@@ -16,3 +16,6 @@ playwright-report/
 .env.*
 !.env.example
 .vercel
+
+# The repository root ignores "lib/" (Python); the storefront source lives in src/lib.
+!lib/
