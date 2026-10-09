@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Pistachio baklava tray (sample image)">
+  <rect width="800" height="800" fill="#f5edd6"/>
+  <rect x="40" y="40" width="720" height="720" rx="5" fill="none" stroke="#c0392b" stroke-opacity="0.35" stroke-width="3"/>
+  <text x="400" y="372" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="52" fill="#c0392b" text-transform="uppercase"><tspan x="400" dy="0">Pistachio</tspan><tspan x="400" dy="56">baklava tray</tspan></text>
+  <text x="400" y="735" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#c0392b" fill-opacity="0.7">SAMPLE IMAGE</text>
+</svg>
