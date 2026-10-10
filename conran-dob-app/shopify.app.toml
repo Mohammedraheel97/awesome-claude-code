@@ -1,9 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "Conran Date of Birth"
+name = "Birthday"
 application_url = "https://shopify.dev/apps/default-app-home"
 embedded = true
-client_id = "629bf03a6f6df6080a0e6d284363157f"
+client_id = "641d7ae48c5687a2e52f4d8db2562359"
 
 [build]
 automatically_update_urls_on_dev = true
