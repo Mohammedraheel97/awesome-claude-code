@@ -1,0 +1,45 @@
+# This file stores configurations for your Shopify app.
+# Run `npm run config:link` once to connect it to the app you created in the Shopify Dev Dashboard;
+# the CLI fills in client_id, application_url and the auth redirect URLs.
+client_id = ""
+name = "Out-of-Stock Sorter"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+# write_products: switch collections to manual sort and reorder their products.
+# read_inventory: receive inventory level webhooks and map inventory items to products.
+scopes = "write_products,read_inventory"
+
+[webhooks]
+api_version = "2026-10"
+
+  # Handled by: /app/routes/webhooks.app.uninstalled.tsx
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/uninstalled"
+  topics = ["app/uninstalled"]
+
+  # Handled by: /app/routes/webhooks.app.scopes_update.tsx
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+  # Handled by: /app/routes/webhooks.inventory.tsx
+  [[webhooks.subscriptions]]
+  topics = [ "inventory_levels/update" ]
+  uri = "/webhooks/inventory"
+  include_fields = [ "inventory_item_id", "available", "updated_at" ]
+
+  # Handled by: /app/routes/webhooks.products.tsx
+  # No updated_at here on purpose: edits that don't touch these fields produce identical
+  # payloads, which Shopify debounces.
+  [[webhooks.subscriptions]]
+  topics = [ "products/create", "products/update" ]
+  uri = "/webhooks/products"
+  include_fields = [ "id", "tags", "variants.id", "variants.inventory_policy", "variants.inventory_management", "variants.inventory_quantity" ]
+
+  # Handled by: /app/routes/webhooks.collections.tsx
+  [[webhooks.subscriptions]]
+  topics = [ "collections/create", "collections/update" ]
+  uri = "/webhooks/collections"
+  include_fields = [ "id", "title", "handle", "sort_order", "updated_at" ]

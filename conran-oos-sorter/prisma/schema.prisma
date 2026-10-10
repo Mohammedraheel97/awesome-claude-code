@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SQLite is fine for a single always-on instance with a persistent disk.
+// For multiple instances, switch to PostgreSQL (see README → "Database").
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+/// Per-shop configuration, edited from the app's dashboard.
+model ShopSettings {
+  shop                   String    @id
+  /// Master switch. When off, nothing is read or written.
+  enabled                Boolean   @default(true)
+  /// false = preview only: plans are calculated and logged but collections are never changed.
+  liveMode               Boolean   @default(false)
+  /// Products carrying this tag are never pushed down, even when out of stock.
+  pinTag                 String    @default("oos-keep-position")
+  /// In manually sorted collections, put restocked products back where they were.
+  restoreManualPositions Boolean   @default(true)
+  /// How often every collection is re-checked from scratch, in hours.
+  fullSweepIntervalHours Int       @default(6)
+  lastFullSweepAt        DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+/// One row per collection the app knows about.
+model CollectionState {
+  shop            String
+  collectionId    String
+  title           String
+  handle          String
+  /// The order products should follow before out-of-stock products are pushed down
+  /// (a CollectionSortOrder value). Null until first seen.
+  baseSort        String?
+  excluded        Boolean   @default(false)
+  /// Waiting to be (re)sorted by the worker.
+  dirty           Boolean   @default(true)
+  /// Higher runs first: 1 = stock change / manual request, 0 = scheduled sweep.
+  priority        Int       @default(0)
+  dirtySince      DateTime  @default(now())
+  /// Bumped every time the collection is queued, so a run can tell if it was re-queued meanwhile.
+  dirtyVersion    Int       @default(0)
+  productCount    Int?
+  outOfStockCount Int?
+  /// Moves applied (live) or that would be applied (preview) on the last run.
+  lastMoves       Int?
+  lastRunLive     Boolean?
+  lastSortedAt    DateTime?
+  lastError       String?
+  /// Manual collections: JSON { order, hidden } of numeric product ids, the merchandised order
+  /// including pushed-down products, so restocked products go back to their place.
+  manualMemory    String?
+  updatedAt       DateTime  @updatedAt
+
+  @@id([shop, collectionId])
+  @@index([shop, dirty, priority, dirtySince])
+}
+
+/// Cached stock state per product, kept fresh by webhooks and full sweeps.
+model ProductStock {
+  shop      String
+  productId String
+  /// At least one variant is available for sale.
+  available Boolean
+  /// Lower-cased tags joined with "\n".
+  tags      String   @default("")
+  checkedAt DateTime @default(now())
+
+  @@id([shop, productId])
+}
+
+/// Products waiting to have their stock re-checked (filled by webhooks).
+/// key is "product:<gid>" or "inventory:<gid>" so repeated webhooks collapse into one row.
+model PendingCheck {
+  shop      String
+  key       String
+  createdAt DateTime @default(now())
+
+  @@id([shop, key])
+  @@index([shop, createdAt])
+}
+
+model ActivityLog {
+  id           Int      @id @default(autoincrement())
+  shop         String
+  collectionId String?
+  title        String?
+  /// sorted | preview | sweep | error | info
+  kind         String
+  moves        Int      @default(0)
+  message      String
+  createdAt    DateTime @default(now())
+
+  @@index([shop, createdAt])
+}
+
+/// Prevents two workers (or two instances) from processing at the same time.
+model WorkerLock {
+  name      String   @id
+  owner     String
+  expiresAt DateTime
+}
