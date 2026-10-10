@@ -1,25 +1,29 @@
 // The background worker: turns webhooks and schedules into collection re-sorts.
 //
 // One "tick" (every minute by default) does, per installed shop:
-//   1. a full sweep when one is due: refresh the stock of every product and queue every collection;
-//   2. stock re-checks queued by webhooks, queueing the collections of products whose
+//   1. undo requests (restore one collection, or all of them and turn the app off);
+//   2. a full sweep when one is due: refresh the stock of every product and queue every collection;
+//   3. stock re-checks queued by webhooks, queueing the collections of products whose
 //      in-stock / out-of-stock state actually changed;
-//   3. queued collections, highest priority first, until the time budget runs out.
+//   4. queued collections, highest priority first, until the time budget runs out.
+// While the app is paused, steps 2 and 4 wait; while it is off, only step 1 runs.
 // Work is stored in the database, so it carries over between ticks and restarts.
 
 import { randomUUID } from "node:crypto";
 import type { CollectionState, ShopSettings } from "@prisma/client";
 import db from "../db.server";
-import { sortCollection } from "./collection-sorter.server";
+import { restoreCollection, sortCollection } from "./collection-sorter.server";
 import { decodeMemory, encodeMemory, hasTag, isCollectionSortOrder, SORT_ORDER_LABELS } from "./ordering";
 import { adminTransport, createShopifyGateway, type AdminGraphql, type ShopifyGateway } from "./shopify-gateway.server";
 import {
   acquireLock,
+  addDailyMoves,
   clearDirty,
   getCachedStock,
   getSettings,
   getStock,
   isFullSweepDue,
+  isPaused,
   logActivity,
   markCollectionsDirty,
   nextDirtyCollection,
@@ -29,6 +33,7 @@ import {
   releaseLock,
   replaceStock,
   saveStock,
+  snapshotStock,
   updateSettings,
 } from "./store.server";
 
@@ -102,6 +107,7 @@ export async function processCollection(
     },
   });
   await clearDirty(state);
+  if (applied && moves.length > 0) await addDailyMoves(shop, moves.length);
 
   const details = [
     `${result.outOfStock.length} of ${inCollection.length} products out of stock`,
@@ -242,11 +248,14 @@ export async function runTick({
       for (const { shop } of sessions) {
         if (Date.now() > deadline) break;
         const settings = await getSettings(shop);
-        if (!settings.enabled) continue;
+        const undoPending =
+          settings.restoreAllStatus !== null ||
+          (await db.collectionState.count({ where: { shop, restoreRequested: true } })) > 0;
+        if (!settings.enabled && !undoPending) continue;
         summary.shops += 1;
         try {
           const gateway = await gatewayFor(shop);
-          await runShopTick(shop, gateway, settings, deadline, summary);
+          await runShopTick(shop, gateway, deadline, summary);
         } catch (error) {
           console.error(`[oos-sorter] ${shop}:`, error);
           await logActivity(shop, { kind: "error", message: errorMessage(error) }).catch(() => {});
@@ -261,19 +270,23 @@ export async function runTick({
   }
 }
 
-async function runShopTick(
-  shop: string,
-  gateway: ShopifyGateway,
-  initialSettings: ShopSettings,
-  deadline: number,
-  summary: TickSummary,
-) {
-  let settings = initialSettings;
-  if (isFullSweepDue(settings)) {
+async function runShopTick(shop: string, gateway: ShopifyGateway, deadline: number, summary: TickSummary) {
+  await updateSettings(shop, { lastTickAt: new Date() });
+  summary.collections += await processRestores(shop, gateway, deadline);
+
+  let settings = await getSettings(shop);
+  if (!settings.enabled || settings.restoreAllStatus !== null) return;
+  const paused = isPaused(settings);
+  if (!paused && isFullSweepDue(settings)) {
     await runFullSweep(shop, gateway, settings);
     settings = await getSettings(shop);
   }
+  // Stock changes are still recorded while paused, so nothing is missed on resume.
   summary.checks += await processPendingChecks(shop, gateway, settings, deadline);
+  if (paused) {
+    await snapshotStock(shop);
+    return;
+  }
 
   const runs = new Map<string, number>();
   while (Date.now() < deadline) {
@@ -286,6 +299,84 @@ async function runShopTick(
     summary.collections += 1;
     // Let fresh stock changes jump ahead of a long sweep.
     if (summary.collections % 10 === 0) summary.checks += await processPendingChecks(shop, gateway, settings, deadline);
+  }
+  await snapshotStock(shop);
+}
+
+/** Handles undo requests: single collections, or "restore all and turn off". */
+export async function processRestores(shop: string, gateway: ShopifyGateway, deadline: number) {
+  let settings = await getSettings(shop);
+  if (settings.restoreAllStatus === "requested") {
+    await db.collectionState.updateMany({ where: { shop }, data: { restoreRequested: true } });
+    settings = await updateSettings(shop, { restoreAllStatus: "running", liveMode: false });
+    await logActivity(shop, { kind: "info", message: "Restoring every collection to how it was before the app." });
+  }
+  const restoringAll = settings.restoreAllStatus === "running";
+
+  let processed = 0;
+  while (Date.now() < deadline) {
+    const state = await db.collectionState.findFirst({
+      where: { shop, restoreRequested: true },
+      orderBy: { title: "asc" },
+    });
+    if (!state) break;
+    // A single undo also stops the app managing the collection; "restore all" turns the app off instead.
+    await restoreOne(shop, gateway, state, { exclude: !restoringAll });
+    processed += 1;
+  }
+
+  if (restoringAll && (await db.collectionState.count({ where: { shop, restoreRequested: true } })) === 0) {
+    await updateSettings(shop, { restoreAllStatus: null, enabled: false, liveMode: false });
+    await logActivity(shop, { kind: "info", message: "All collections restored. The app is now off." });
+  }
+  return processed;
+}
+
+async function restoreOne(shop: string, gateway: ShopifyGateway, state: CollectionState, { exclude }: { exclude: boolean }) {
+  const where = { shop, collectionId: state.collectionId };
+  try {
+    const result = await restoreCollection({
+      gateway,
+      collectionId: state.collectionId,
+      baseSort: isCollectionSortOrder(state.baseSort) ? state.baseSort : null,
+      memory: decodeMemory(state.manualMemory),
+    });
+    if (result.status === "missing") {
+      await db.collectionState.deleteMany({ where });
+      return;
+    }
+    await db.collectionState.updateMany({
+      where,
+      data: {
+        restoreRequested: false,
+        manualMemory: null,
+        dirty: false,
+        priority: PRIORITY_SWEEP,
+        lastError: null,
+        lastMoves: null,
+        lastRunLive: null,
+        lastSortedAt: null,
+        ...(exclude ? { excluded: true } : {}),
+      },
+    });
+    const what = result.sortOrder
+      ? `Sort order set back to "${SORT_ORDER_LABELS[result.sortOrder]}"`
+      : result.moves > 0
+        ? `Moved ${result.moves} product${result.moves === 1 ? "" : "s"} back to their merchandised positions`
+        : "Nothing to undo";
+    if (exclude || result.sortOrder || result.moves > 0) {
+      await logActivity(shop, {
+        kind: "restored",
+        collectionId: state.collectionId,
+        title: result.collection.title,
+        moves: result.moves,
+        message: exclude ? `${what} · the app no longer manages this collection` : what,
+      });
+    }
+  } catch (error) {
+    const message = `Restore failed: ${errorMessage(error)}`;
+    await db.collectionState.updateMany({ where, data: { restoreRequested: false, lastError: message } });
+    await logActivity(shop, { kind: "error", collectionId: state.collectionId, title: state.title, message });
   }
 }
 

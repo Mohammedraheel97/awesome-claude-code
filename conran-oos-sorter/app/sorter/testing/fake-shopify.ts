@@ -77,7 +77,7 @@ export class FakeShopify {
 
   mutationCount() {
     return this.calls.filter((call) =>
-      ["OosSorterSetManualSort", "OosSorterReorder"].includes(call),
+      ["OosSorterSetSortOrder", "OosSorterReorder"].includes(call),
     ).length;
   }
 
@@ -149,7 +149,7 @@ export class FakeShopify {
           }),
         };
       }
-      case "OosSorterSetManualSort": {
+      case "OosSorterSetSortOrder": {
         const input = v.input as { id: string; sortOrder: CollectionSortOrder };
         const collection = this.collections.get(input.id);
         if (!collection) return { collectionUpdate: { collection: null, userErrors: [{ field: ["id"], message: "Collection does not exist" }] } };

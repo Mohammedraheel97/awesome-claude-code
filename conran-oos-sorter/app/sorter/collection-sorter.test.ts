@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sortCollection, type SortCollectionInput } from "./collection-sorter.server";
+import { restoreCollection, sortCollection, type SortCollectionInput } from "./collection-sorter.server";
 import type { ManualMemory } from "./ordering";
 import { adminTransport, createShopifyGateway, throttleDelay } from "./shopify-gateway.server";
 import { collectionGid, FakeShopify, inventoryItemGid, productGid } from "./testing/fake-shopify";
@@ -203,6 +203,44 @@ describe("sortCollection", () => {
   it("reports collections that no longer exist", async () => {
     const { run } = setup();
     expect(await run({ collectionId: collectionGid(404) })).toEqual({ status: "missing" });
+  });
+});
+
+describe("restoreCollection", () => {
+  it("puts pushed-down products back in their merchandised positions", async () => {
+    const { shopify, gateway, run } = setup();
+    const ids = addProducts(shopify, 5, [1, 3]);
+    const collection = shopify.addCollection({ id: collectionGid(1), manual: ids });
+    let memory: ManualMemory | null = null;
+    await run({ collectionId: collection.id, saveMemory: async (next) => void (memory = next) });
+    expect(label(collection.manual)).toEqual(["P2", "P4", "P5", "P1", "P3"]);
+
+    const result = await restoreCollection({ gateway, collectionId: collection.id, baseSort: "MANUAL", memory });
+
+    expect(collection.manual).toEqual(ids);
+    expect(result).toMatchObject({ status: "done", moves: 2, sortOrder: null });
+  });
+
+  it("gives an automatic collection its sort order back", async () => {
+    const { shopify, gateway } = setup();
+    const ids = addProducts(shopify, 3);
+    const collection = shopify.addCollection({ id: collectionGid(1), manual: ids });
+
+    const result = await restoreCollection({ gateway, collectionId: collection.id, baseSort: "CREATED_DESC", memory: null });
+
+    expect(collection.sortOrder).toBe("CREATED_DESC");
+    expect(result).toMatchObject({ status: "done", moves: 0, sortOrder: "CREATED_DESC" });
+  });
+
+  it("has nothing to undo when the app never moved anything", async () => {
+    const { shopify, gateway } = setup();
+    const ids = addProducts(shopify, 3, [1]);
+    shopify.addCollection({ id: collectionGid(1), manual: ids });
+
+    const result = await restoreCollection({ gateway, collectionId: collectionGid(1), baseSort: "MANUAL", memory: null });
+
+    expect(result).toMatchObject({ status: "done", moves: 0 });
+    expect(shopify.mutationCount()).toBe(0);
   });
 });
 

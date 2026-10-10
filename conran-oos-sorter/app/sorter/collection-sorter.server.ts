@@ -6,6 +6,7 @@ import {
   computeTargetOrder,
   hasTag,
   EMPTY_MEMORY,
+  restoredOrder,
   sortSpecFor,
   type CollectionSortOrder,
   type ManualMemory,
@@ -66,7 +67,7 @@ export async function sortCollection(input: SortCollectionInput): Promise<SortCo
   const adoptedSort = collection.sortOrder !== "MANUAL" ? collection.sortOrder : null;
   const baseSort: CollectionSortOrder = adoptedSort ?? input.storedBaseSort ?? "MANUAL";
 
-  if (adoptedSort && live) await gateway.setManualSort(collectionId);
+  if (adoptedSort && live) await gateway.setSortOrder(collectionId, "MANUAL");
   // In preview the collection keeps its sort order, so plan against what shoppers see today.
   const currentSort: CollectionSortOrder = adoptedSort && !live ? adoptedSort : "MANUAL";
 
@@ -113,4 +114,48 @@ export async function sortCollection(input: SortCollectionInput): Promise<SortCo
     memory: memory ?? null,
     applied: live,
   };
+}
+
+export type RestoreCollectionResult =
+  | { status: "missing" }
+  | {
+      status: "done";
+      collection: CollectionMeta;
+      /** Products moved back to their merchandised position (manual collections). */
+      moves: number;
+      /** The sort order the collection was given back, if it was automatic before the app. */
+      sortOrder: CollectionSortOrder | null;
+    };
+
+/**
+ * Undoes the app's work on one collection. Manual collections get every pushed-down product
+ * back in its merchandised position; collections that had an automatic sort get it back,
+ * so Shopify orders them again.
+ */
+export async function restoreCollection({
+  gateway,
+  collectionId,
+  baseSort,
+  memory,
+}: {
+  gateway: ShopifyGateway;
+  collectionId: string;
+  baseSort: CollectionSortOrder | null;
+  memory: ManualMemory | null;
+}): Promise<RestoreCollectionResult> {
+  const collection = await gateway.getCollection(collectionId);
+  if (!collection) return { status: "missing" };
+
+  if (baseSort && baseSort !== "MANUAL") {
+    if (collection.sortOrder !== baseSort) await gateway.setSortOrder(collectionId, baseSort);
+    return { status: "done", collection, moves: 0, sortOrder: baseSort };
+  }
+  if (!memory || collection.sortOrder !== "MANUAL") {
+    return { status: "done", collection, moves: 0, sortOrder: null };
+  }
+
+  const current = (await gateway.getCollectionProducts(collectionId, sortSpecFor("MANUAL"))).map((p) => p.id);
+  const moves = computeMoves(current, restoredOrder(current, memory));
+  if (moves.length > 0) await gateway.reorderProducts(collectionId, moves);
+  return { status: "done", collection, moves: moves.length, sortOrder: null };
 }

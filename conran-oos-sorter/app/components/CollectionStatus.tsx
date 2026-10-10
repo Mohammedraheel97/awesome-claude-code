@@ -2,6 +2,7 @@ import { formatWhen } from "../sorter/format";
 
 export interface CollectionRow {
   excluded: boolean;
+  restoreRequested?: boolean;
   dirty: boolean;
   lastError: string | null;
   lastSortedAt: string | null;
@@ -10,6 +11,7 @@ export interface CollectionRow {
 }
 
 export function CollectionStatus({ collection, now }: { collection: CollectionRow; now: string }) {
+  if (collection.restoreRequested) return <s-badge tone="info">Restoring</s-badge>;
   if (collection.excluded) return <s-badge>Excluded</s-badge>;
   if (collection.lastError) {
     return (

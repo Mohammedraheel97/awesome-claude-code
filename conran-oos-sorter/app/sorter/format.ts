@@ -12,3 +12,31 @@ export const plural = (count: number, word: string) => `${count.toLocaleString("
 
 /** gid://shopify/Collection/123 -> 123 */
 export const numericId = (gid: string) => gid.split("/").pop() ?? gid;
+
+/** formatWhen for use mid-sentence: "last ran just now", "last ran 5 min ago". */
+export function whenInline(iso: string | null | undefined, nowIso: string): string {
+  const text = formatWhen(iso, nowIso);
+  return text === "Just now" || text === "Never" ? text.toLowerCase() : text;
+}
+
+/** "2026-10-10" -> "10 Oct" */
+export function dayLabel(day: string): string {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date)).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
+
+/** "45 min", "3 h 20 min", "2 days" */
+export function formatDuration(ms: number): string {
+  const minutes = Math.max(1, Math.round(ms / 60_000));
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const restMinutes = minutes % 60;
+  if (hours < 24) return restMinutes ? `${hours} h ${restMinutes} min` : `${hours} h`;
+  const days = Math.floor(hours / 24);
+  const restHours = hours % 24;
+  return restHours ? `${days} d ${restHours} h` : plural(days, "day");
+}

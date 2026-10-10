@@ -34,14 +34,34 @@ note them first. This app only does out-of-stock-to-bottom on top of a base orde
 
 ## What's in the app
 
-- **Dashboard**: mode (preview or live), totals, recent activity, and settings: on/off switch,
-  keep-in-place tag, restock behaviour, and full-check interval.
-- **Collections**: every collection with its base order, product and out-of-stock counts, and
-  status. Filter by *Needs changes*, *Waiting*, *Errors* or *Excluded*. Each row has *Sort now* and
-  *Exclude* buttons.
-- **Collection page**: a dry run of the next sort. It shows which products would move and from
-  which position to which, plus the first 24 products afterwards. In preview mode,
-  **Apply to this collection only** lets you try the app on one collection first.
+**Dashboard** (the control center)
+
+- **Mode**: *Off* (nothing is read or changed), *Preview* (plans only), or *Live*. Going live asks
+  for confirmation and shows how many products the current plan would move.
+- **Pause** for 1 hour, 4 hours or 1 day, e.g. while merchandising a campaign. Stock changes are
+  still recorded and applied on resume.
+- **Run full check now** and **Process waiting work** buttons.
+- **Overview**: products out of stock, collections managed, products moved today (or moves
+  waiting for go-live in preview), and background-worker health. A progress bar shows the current
+  full check.
+- **Charts** for products moved per day and products out of stock over the last 14 days, with
+  hover tooltips and a table view.
+- **Needs attention**: collections that failed, and those with the most out-of-stock products.
+- **Restore all and turn off**: puts every collection back the way it was before the app,
+  then turns the app off.
+- **Recent activity** log.
+
+**Collections**: every collection with its base order, product and out-of-stock counts, and
+status. Search, filter (*Needs changes*, *Waiting*, *Errors*, *Excluded*), and select several to
+**Sort now**, **Exclude**, **Include**, **Set base order** or **Restore order** in one go.
+
+**Collection page**: a dry run of the next sort. It shows which products would move and from
+which position to which, plus the first 24 products afterwards. From here you can **Apply to this
+collection only** (in preview), change the base order, exclude the collection, or
+**Restore original order**. Restoring puts pushed-down products back in their merchandised
+positions (or gives an automatic sort order back) and stops managing the collection.
+
+**Settings**: keep-in-place tag, restock behaviour, and full-check interval.
 
 ## Set up
 
@@ -61,7 +81,7 @@ npm run config:link     # links shopify.app.toml to the app you just created
 
 ```sh
 npm run dev             # Shopify CLI: tunnel, auth, installs on your dev store
-npm test                # 51 tests: ordering logic, Shopify API layer, worker end to end
+npm test                # 58 tests: ordering logic, Shopify API layer, worker end to end
 ```
 
 ### 3. Deploy
@@ -108,7 +128,8 @@ The app asks for `write_products` (to set collections to manual and reorder them
 5. On the Dashboard, click **Go live**. All collections are sorted over the next few minutes.
    Afterwards, only collections with stock changes are touched.
 
-You can switch back to preview, exclude a collection, or turn the app off at any time.
+You can switch back to preview, pause, exclude a collection, or turn the app off at any time. To
+undo everything, use **Restore all and turn off** on the Dashboard.
 
 ## How it runs
 
@@ -155,7 +176,9 @@ To run more than one instance, switch to PostgreSQL:
 | `app/sorter/collection-sorter.server.ts` | Sorts one collection (or dry-runs it) |
 | `app/sorter/worker.server.ts` | The background worker: full checks, webhook queue, scheduling and locking |
 | `app/sorter/store.server.ts` | Database helpers |
-| `app/routes/app._index.tsx` | Dashboard and settings |
+| `app/routes/app._index.tsx` | Dashboard: controls, overview, charts, activity, undo |
+| `app/routes/app.settings.tsx` | Settings |
+| `app/components/charts.tsx` | Dependency-free SVG charts (columns, line, progress meter) |
 | `app/routes/app.collections._index.tsx`, `app/routes/app.collections.$id.tsx` | Collections list and per-collection preview |
 | `app/routes/webhooks.*.tsx` | Webhook endpoints |
 | `app/sorter/testing/fake-shopify.ts` | In-memory Shopify used by the tests, with the same reorder semantics as the real API |

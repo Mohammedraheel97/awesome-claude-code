@@ -1,0 +1,179 @@
+/* Chart tokens. Series blue validated (dataviz validate_palette.js) against #ffffff and #1a1a1a. */
+.viz {
+  --viz-surface: #ffffff;
+  --viz-series: #2a78d6;
+  --viz-track: #cde2fb;
+  --viz-wash: rgba(42, 120, 214, 0.1);
+  --viz-grid: #ebebeb;
+  --viz-text: #303030;
+  --viz-text-secondary: #616161;
+  --viz-tooltip-border: #e3e3e3;
+  color-scheme: light;
+  position: relative;
+  color: var(--viz-text);
+  font: inherit;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:where(:not([data-theme="light"]))) .viz {
+    --viz-surface: #1a1a1a;
+    --viz-series: #3987e5;
+    --viz-track: #184f95;
+    --viz-wash: rgba(57, 135, 229, 0.12);
+    --viz-grid: #303030;
+    --viz-text: #e3e3e3;
+    --viz-text-secondary: #b5b5b5;
+    --viz-tooltip-border: #3a3a3a;
+    color-scheme: dark;
+  }
+}
+
+:global(:root[data-theme="dark"]) .viz {
+  --viz-surface: #1a1a1a;
+  --viz-series: #3987e5;
+  --viz-track: #184f95;
+  --viz-wash: rgba(57, 135, 229, 0.12);
+  --viz-grid: #303030;
+  --viz-text: #e3e3e3;
+  --viz-text-secondary: #b5b5b5;
+  --viz-tooltip-border: #3a3a3a;
+  color-scheme: dark;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.axisText {
+  fill: var(--viz-text-secondary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.valueText {
+  fill: var(--viz-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gridLine {
+  stroke: var(--viz-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: var(--viz-series);
+  transition: opacity 120ms ease;
+}
+
+.barActive {
+  opacity: 0.75;
+}
+
+.hit {
+  fill: transparent;
+  cursor: default;
+  outline: none;
+}
+
+.hit:focus-visible {
+  stroke: var(--viz-text);
+  stroke-width: 1;
+}
+
+.line {
+  fill: none;
+  stroke: var(--viz-series);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.area {
+  fill: var(--viz-wash);
+}
+
+.dot {
+  fill: var(--viz-series);
+  stroke: var(--viz-surface);
+  stroke-width: 2;
+}
+
+.crosshair {
+  stroke: var(--viz-text-secondary);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 8px));
+  background: var(--viz-surface);
+  border: 1px solid var(--viz-tooltip-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 6px 10px;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.tooltipValue {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--viz-text);
+}
+
+.tooltipLabel {
+  display: block;
+  font-size: 12px;
+  color: var(--viz-text-secondary);
+}
+
+.tableToggle {
+  margin-top: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--viz-grid);
+}
+
+.table td:last-child,
+.table th:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.meterTrack {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--viz-track);
+  overflow: hidden;
+}
+
+.meterFill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--viz-series);
+  transition: width 300ms ease;
+}
+
+.empty {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--viz-text-secondary);
+}

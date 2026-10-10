@@ -62,6 +62,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     },
     state: state && {
       excluded: state.excluded,
+      restoreRequested: state.restoreRequested,
       dirty: state.dirty,
       lastError: state.lastError,
       lastSortedAt: state.lastSortedAt?.toISOString() ?? null,
@@ -142,17 +143,20 @@ export default function CollectionDetail() {
         Collections
       </s-link>
       {liveMode && !excluded && (
-        <s-button slot="primary-action" onClick={() => submit({ intent: "sort-now" })} {...(busy ? { loading: true } : {})}>
+        <s-button slot="primary-action" variant="primary" onClick={() => submit({ intent: "sort-now" })} {...(busy ? { loading: true } : {})}>
           Sort now
         </s-button>
       )}
       {!liveMode && !excluded && (
-        <s-button slot="primary-action" onClick={() => submit({ intent: "apply-once" })} {...(busy ? { loading: true } : {})}>
+        <s-button slot="primary-action" variant="primary" onClick={() => submit({ intent: "apply-once" })} {...(busy ? { loading: true } : {})}>
           Apply to this collection only
         </s-button>
       )}
       <s-button slot="secondary-actions" onClick={() => submit({ intent: excluded ? "include" : "exclude" })}>
         {excluded ? "Include collection" : "Exclude collection"}
+      </s-button>
+      <s-button slot="secondary-actions" commandFor="restore-modal" command="--show">
+        Restore original order
       </s-button>
 
       {excluded && (
@@ -167,8 +171,11 @@ export default function CollectionDetail() {
             {plan.moveCount === 0
               ? "The collection is already in order: every out-of-stock product is below the in-stock ones."
               : `${plural(plan.moveCount, "product")} ${liveMode && !excluded ? "will be" : "would be"} moved.`}{" "}
-            {plural(plan.outOfStockCount, "product")} of {plan.productCount.toLocaleString("en-GB")} {plan.outOfStockCount === 1 ? "is" : "are"} out of stock
-            {plan.pinnedCount > 0 ? `, and ${plural(plan.pinnedCount, "out-of-stock product")} tagged “${pinTag}” stay in place` : ""}.
+            {plan.outOfStockCount.toLocaleString("en-GB")} of {plural(plan.productCount, "product")} {plan.outOfStockCount === 1 ? "is" : "are"} out of stock
+            {plan.pinnedCount > 0
+              ? `, and ${plural(plan.pinnedCount, "out-of-stock product")} tagged “${pinTag}” ${plan.pinnedCount === 1 ? "stays" : "stay"} in place`
+              : ""}
+            .
           </s-paragraph>
           {plan.switchToManual && (
             <s-banner tone="info">
@@ -240,6 +247,27 @@ export default function CollectionDetail() {
           </s-link>
         </s-stack>
       </s-section>
+      <s-modal id="restore-modal" heading={`Restore ${collection.title}?`}>
+        <s-paragraph>
+          {plan.baseSort === "MANUAL"
+            ? "Products the app pushed down go back to their merchandised positions, in stock or not."
+            : `The collection gets its "${SORT_ORDER_LABELS[plan.baseSort]}" sort order back, so Shopify orders it again.`}{" "}
+          The app then stops managing this collection (it is excluded). You can include it again at any time.
+        </s-paragraph>
+        <s-button
+          slot="primary-action"
+          variant="primary"
+          tone="critical"
+          commandFor="restore-modal"
+          command="--hide"
+          onClick={() => submit({ intent: "restore" })}
+        >
+          Restore
+        </s-button>
+        <s-button slot="secondary-actions" commandFor="restore-modal" command="--hide">
+          Cancel
+        </s-button>
+      </s-modal>
     </s-page>
   );
 }

@@ -25,6 +25,10 @@ export function requestFullSweep(shop: string) {
   return updateSettings(shop, { lastFullSweepAt: null });
 }
 
+export function isPaused(settings: ShopSettings, now = Date.now()): boolean {
+  return Boolean(settings.pausedUntil && settings.pausedUntil.getTime() > now);
+}
+
 export function isFullSweepDue(settings: ShopSettings, now = Date.now()): boolean {
   if (!settings.lastFullSweepAt) return true;
   return now - settings.lastFullSweepAt.getTime() >= settings.fullSweepIntervalHours * 3_600_000;
@@ -139,7 +143,7 @@ export async function markCollectionsDirty(
 
 export function nextDirtyCollection(shop: string, skip: string[]): Promise<CollectionState | null> {
   return db.collectionState.findFirst({
-    where: { shop, dirty: true, collectionId: { notIn: skip } },
+    where: { shop, dirty: true, restoreRequested: false, collectionId: { notIn: skip } },
     orderBy: [{ priority: "desc" }, { dirtySince: "asc" }],
   });
 }
@@ -156,7 +160,13 @@ export function clearDirty(state: CollectionState) {
 
 export function logActivity(
   shop: string,
-  entry: { kind: "sorted" | "preview" | "sweep" | "error" | "info"; message: string; collectionId?: string; title?: string; moves?: number },
+  entry: {
+    kind: "sorted" | "preview" | "sweep" | "restored" | "error" | "info";
+    message: string;
+    collectionId?: string;
+    title?: string;
+    moves?: number;
+  },
 ) {
   return db.activityLog.create({ data: { shop, ...entry } });
 }
@@ -169,6 +179,34 @@ export async function pruneActivity(shop: string, keep = 1000) {
     select: { id: true },
   });
   if (cutoff) await db.activityLog.deleteMany({ where: { shop, id: { lte: cutoff.id } } });
+}
+
+// --- Daily stats (dashboard charts) ---
+
+export const utcDay = (date = new Date()) => date.toISOString().slice(0, 10);
+
+export function addDailyMoves(shop: string, moves: number) {
+  const day = utcDay();
+  return db.dailyStats.upsert({
+    where: { shop_day: { shop, day } },
+    create: { shop, day, productsMoved: moves, collectionsSorted: 1 },
+    update: { productsMoved: { increment: moves }, collectionsSorted: { increment: 1 } },
+  });
+}
+
+/** Records today's product and out-of-stock counts from the stock cache. */
+export async function snapshotStock(shop: string) {
+  const day = utcDay();
+  const [products, outOfStock] = await Promise.all([
+    db.productStock.count({ where: { shop } }),
+    db.productStock.count({ where: { shop, available: false } }),
+  ]);
+  if (products === 0) return;
+  await db.dailyStats.upsert({
+    where: { shop_day: { shop, day } },
+    create: { shop, day, products, outOfStock },
+    update: { products, outOfStock },
+  });
 }
 
 // --- Locking ---
@@ -198,5 +236,6 @@ export async function deleteShopData(shop: string) {
     db.productStock.deleteMany({ where: { shop } }),
     db.pendingCheck.deleteMany({ where: { shop } }),
     db.activityLog.deleteMany({ where: { shop } }),
+    db.dailyStats.deleteMany({ where: { shop } }),
   ]);
 }

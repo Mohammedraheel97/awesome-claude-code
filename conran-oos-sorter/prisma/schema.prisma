@@ -46,38 +46,46 @@ model ShopSettings {
   /// How often every collection is re-checked from scratch, in hours.
   fullSweepIntervalHours Int       @default(6)
   lastFullSweepAt        DateTime?
+  /// While in the future, the worker doesn't sort anything (stock changes are still recorded).
+  pausedUntil            DateTime?
+  /// Last time the worker ran for this shop (shown as worker health on the dashboard).
+  lastTickAt             DateTime?
+  /// "Restore all and turn off": null | "requested" | "running".
+  restoreAllStatus       String?
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 }
 
 /// One row per collection the app knows about.
 model CollectionState {
-  shop            String
-  collectionId    String
-  title           String
-  handle          String
+  shop             String
+  collectionId     String
+  title            String
+  handle           String
   /// The order products should follow before out-of-stock products are pushed down
   /// (a CollectionSortOrder value). Null until first seen.
-  baseSort        String?
-  excluded        Boolean   @default(false)
+  baseSort         String?
+  excluded         Boolean   @default(false)
+  /// Undo requested: put the collection back the way it was and stop managing it.
+  restoreRequested Boolean   @default(false)
   /// Waiting to be (re)sorted by the worker.
-  dirty           Boolean   @default(true)
+  dirty            Boolean   @default(true)
   /// Higher runs first: 1 = stock change / manual request, 0 = scheduled sweep.
-  priority        Int       @default(0)
-  dirtySince      DateTime  @default(now())
+  priority         Int       @default(0)
+  dirtySince       DateTime  @default(now())
   /// Bumped every time the collection is queued, so a run can tell if it was re-queued meanwhile.
-  dirtyVersion    Int       @default(0)
-  productCount    Int?
-  outOfStockCount Int?
+  dirtyVersion     Int       @default(0)
+  productCount     Int?
+  outOfStockCount  Int?
   /// Moves applied (live) or that would be applied (preview) on the last run.
-  lastMoves       Int?
-  lastRunLive     Boolean?
-  lastSortedAt    DateTime?
-  lastError       String?
+  lastMoves        Int?
+  lastRunLive      Boolean?
+  lastSortedAt     DateTime?
+  lastError        String?
   /// Manual collections: JSON { order, hidden } of numeric product ids, the merchandised order
   /// including pushed-down products, so restocked products go back to their place.
-  manualMemory    String?
-  updatedAt       DateTime  @updatedAt
+  manualMemory     String?
+  updatedAt        DateTime  @updatedAt
 
   @@id([shop, collectionId])
   @@index([shop, dirty, priority, dirtySince])
@@ -119,6 +127,20 @@ model ActivityLog {
   createdAt    DateTime @default(now())
 
   @@index([shop, createdAt])
+}
+
+/// One row per shop per UTC day, for the dashboard charts.
+model DailyStats {
+  shop              String
+  /// YYYY-MM-DD (UTC)
+  day               String
+  productsMoved     Int    @default(0)
+  collectionsSorted Int    @default(0)
+  /// Snapshot of the stock cache, updated through the day.
+  products          Int?
+  outOfStock        Int?
+
+  @@id([shop, day])
 }
 
 /// Prevents two workers (or two instances) from processing at the same time.

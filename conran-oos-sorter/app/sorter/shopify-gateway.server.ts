@@ -36,7 +36,7 @@ export interface ShopifyGateway {
   getProductCollections(productId: string): Promise<Omit<CollectionMeta, "sortOrder" | "productsCount">[]>;
   /** inventory item id -> product id */
   resolveInventoryItems(inventoryItemIds: string[]): Promise<Map<string, string>>;
-  setManualSort(collectionId: string): Promise<void>;
+  setSortOrder(collectionId: string, sortOrder: CollectionSortOrder): Promise<void>;
   reorderProducts(collectionId: string, moves: Move[]): Promise<void>;
   fetchAllProductsStock(): Promise<Map<string, StockInfo>>;
 }
@@ -185,8 +185,8 @@ const INVENTORY_ITEMS = `#graphql
     }
   }`;
 
-const SET_MANUAL_SORT = `#graphql
-  mutation OosSorterSetManualSort($input: CollectionInput!) {
+const SET_SORT_ORDER = `#graphql
+  mutation OosSorterSetSortOrder($input: CollectionInput!) {
     collectionUpdate(input: $input) {
       collection { id sortOrder }
       userErrors { field message }
@@ -394,10 +394,10 @@ export function createShopifyGateway(query: GraphqlTransport, options: GatewayOp
       return products;
     },
 
-    async setManualSort(collectionId) {
+    async setSortOrder(collectionId, sortOrder) {
       const data = await query<{
         collectionUpdate: { userErrors: { field?: string[] | null; message: string }[] } | null;
-      }>(SET_MANUAL_SORT, { input: { id: collectionId, sortOrder: "MANUAL" } });
+      }>(SET_SORT_ORDER, { input: { id: collectionId, sortOrder } });
       assertNoUserErrors("collectionUpdate", data.collectionUpdate?.userErrors);
     },
 

@@ -24,6 +24,7 @@ async function resetDatabase() {
     db.productStock.deleteMany(),
     db.pendingCheck.deleteMany(),
     db.activityLog.deleteMany(),
+    db.dailyStats.deleteMany(),
     db.workerLock.deleteMany(),
   ]);
   await db.session.create({
@@ -44,6 +45,8 @@ beforeEach(async () => {
 });
 
 const manual = (n: number) => label(shopify.collections.get(collectionGid(n))!.manual);
+const stateOf = (n: number) =>
+  db.collectionState.findUniqueOrThrow({ where: { shop_collectionId: { shop: SHOP, collectionId: collectionGid(n) } } });
 
 describe("worker", () => {
   it("starts in preview mode and changes nothing", async () => {
@@ -172,4 +175,77 @@ describe("worker", () => {
     await clearDirty(seen);
     expect((await db.collectionState.findUniqueOrThrow({ where })).dirty).toBe(true);
   });
+
+  it("waits while paused and catches up on resume", async () => {
+    await updateSettings(SHOP, { liveMode: true });
+    await tick();
+    const before = shopify.mutationCount();
+
+    await updateSettings(SHOP, { pausedUntil: new Date(Date.now() + 3_600_000) });
+    shopify.setAvailable(productGid(2), false);
+    await queueCheck(SHOP, `product:${productGid(2)}`);
+    await tick();
+    expect(shopify.mutationCount()).toBe(before);
+    expect(await db.pendingCheck.count()).toBe(0); // the stock change was recorded…
+    expect((await stateOf(1)).dirty).toBe(true); // …and the collection is waiting
+
+    await updateSettings(SHOP, { pausedUntil: null });
+    await tick();
+    expect(manual(1)).toEqual(["P3", "P5", "P6", "P1", "P2", "P4"]);
+  });
+
+  it("undoes one collection and stops managing it", async () => {
+    await updateSettings(SHOP, { liveMode: true });
+    await tick();
+    await db.collectionState.updateMany({ where: { collectionId: { in: [collectionGid(1), collectionGid(2)] } }, data: { restoreRequested: true } });
+    await tick();
+
+    // Manual collection: merchandised order back, out-of-stock products included.
+    expect(manual(1)).toEqual(["P1", "P2", "P3", "P4", "P5", "P6"]);
+    expect(await stateOf(1)).toMatchObject({ excluded: true, restoreRequested: false, manualMemory: null });
+    // Automatic collection: its original sort order is back.
+    expect(shopify.collections.get(collectionGid(2))!.sortOrder).toBe("BEST_SELLING");
+    expect((await stateOf(2)).excluded).toBe(true);
+    // Untouched collections stay managed.
+    expect((await stateOf(3)).excluded).toBe(false);
+    expect(await db.activityLog.count({ where: { shop: SHOP, kind: "restored" } })).toBe(2);
+
+    // Excluded now, so later stock changes leave it alone.
+    shopify.setAvailable(productGid(3), false);
+    await queueCheck(SHOP, `product:${productGid(3)}`);
+    await tick();
+    expect(manual(1)).toEqual(["P1", "P2", "P3", "P4", "P5", "P6"]);
+  });
+
+  it("restores every collection and turns the app off", async () => {
+    await updateSettings(SHOP, { liveMode: true });
+    await tick();
+    await updateSettings(SHOP, { restoreAllStatus: "requested" });
+    await tick();
+
+    expect(manual(1)).toEqual(["P1", "P2", "P3", "P4", "P5", "P6"]);
+    expect(manual(3)).toEqual(["P1", "P2"]);
+    expect(shopify.collections.get(collectionGid(2))!.sortOrder).toBe("BEST_SELLING");
+    expect(await getSettings(SHOP)).toMatchObject({ enabled: false, liveMode: false, restoreAllStatus: null });
+    expect(await db.collectionState.count({ where: { shop: SHOP, excluded: true } })).toBe(0);
+
+    // Off means off.
+    const calls = shopify.calls.length;
+    await queueCheck(SHOP, `product:${productGid(1)}`);
+    await tick();
+    expect(shopify.calls.length).toBe(calls);
+  });
+
+  it("records worker health and daily stats for the dashboard", async () => {
+    await updateSettings(SHOP, { liveMode: true });
+    await tick();
+
+    const settings = await getSettings(SHOP);
+    expect(settings.lastTickAt).toBeInstanceOf(Date);
+    const today = await db.dailyStats.findFirstOrThrow({ where: { shop: SHOP } });
+    // Sofas 2 moves, Best sellers 2 (after the switch to manual), Winter Sale 1.
+    expect(today).toMatchObject({ products: 6, outOfStock: 2, collectionsSorted: 3 });
+    expect(today.productsMoved).toBeGreaterThan(0);
+  });
 });
+

@@ -146,6 +146,14 @@ export function computeTargetOrder({ current, base, isAvailable, memory }: Targe
 }
 
 /**
+ * Undo: the collection's merchandised order with every pushed-down product back in place,
+ * whether or not it is in stock.
+ */
+export function restoredOrder(current: readonly string[], memory: ManualMemory): string[] {
+  return merchandisedOrder(unique(current), memory, () => true).order;
+}
+
+/**
  * The merchandised order of a manual collection: the current order, except that products
  * sitting in the out-of-stock block because of the app are put back at their remembered place
  * (right after whatever preceded them in the remembered order).
