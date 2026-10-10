@@ -1,0 +1,10 @@
+api_version = "2025-10"
+
+[[extensions]]
+name = "Date of birth"
+handle = "date-of-birth"
+type = "ui_extension"
+
+[[extensions.targeting]]
+module = "./src/DateOfBirthCard.jsx"
+target = "customer-account.profile.block.render"

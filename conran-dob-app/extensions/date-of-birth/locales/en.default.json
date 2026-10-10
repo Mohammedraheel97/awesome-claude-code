@@ -1,0 +1,11 @@
+{
+  "heading": "Date of birth",
+  "edit": "Edit date of birth",
+  "notSet": "Not added yet",
+  "modalHeading": "Edit date of birth",
+  "label": "Date of birth",
+  "cancel": "Cancel",
+  "save": "Save",
+  "invalid": "Enter a date between 1900 and today",
+  "saveFailed": "We couldn't save your date of birth. Please try again."
+}
