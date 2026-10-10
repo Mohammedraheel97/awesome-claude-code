@@ -1,26 +1,28 @@
-# Filled in by `shopify app config link` (client_id) on first setup.
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
 name = "Conran Date of Birth"
 application_url = "https://shopify.dev/apps/default-app-home"
 embedded = true
+client_id = "629bf03a6f6df6080a0e6d284363157f"
 
 [build]
 automatically_update_urls_on_dev = true
-include_config_on_deploy = true
 
 [webhooks]
-api_version = "2025-10"
+api_version = "2027-01"
 
 [access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "write_customers,customer_read_customers,customer_write_customers"
 
 [auth]
 redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
 
-# Customer's date of birth. Customers can set it from their account profile;
-# staff can see and edit it on the customer page in Shopify admin.
 [customer.metafields.app.date_of_birth]
 type = "date"
 name = "Date of birth"
 description = "Customer's date of birth, entered on their account profile"
-access.customer_account = "read_write"
-access.admin = "merchant_read_write"
+
+  [customer.metafields.app.date_of_birth.access]
+  customer_account = "read_write"
+  admin = "merchant_read_write"
