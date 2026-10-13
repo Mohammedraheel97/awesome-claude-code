@@ -1,0 +1,12 @@
+{
+  "heading": "When is your birthday?",
+  "description": "Add your birthday so we can celebrate with you.",
+  "month": "MM",
+  "day": "DD",
+  "year": "YYYY",
+  "save": "Save",
+  "saved": "Thanks! Your birthday is saved: {date}",
+  "change": "Change",
+  "invalid": "Enter a valid date between 1900 and today",
+  "saveFailed": "We couldn't save your birthday. You can still place your order."
+}

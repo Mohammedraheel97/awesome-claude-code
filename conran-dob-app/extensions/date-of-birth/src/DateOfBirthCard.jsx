@@ -3,7 +3,7 @@ import {render} from 'preact';
 import {useState, useRef} from 'preact/hooks';
 
 const API_URL = 'shopify:customer-account/api/2025-10/graphql.json';
-const NAMESPACE = '$app';
+const NAMESPACE = 'custom';
 const KEY = 'date_of_birth';
 const MIN_DATE = '1900-01-01';
 

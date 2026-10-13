@@ -1,0 +1,16 @@
+api_version = "2026-04"
+uid = "e93cbfe5-46e8-c205-007d-3ce533c256be40701913"
+
+[[extensions]]
+name = "Checkout birthday"
+handle = "checkout-birthday"
+type = "ui_extension"
+
+[[extensions.targeting]]
+module = "./src/Checkout.jsx"
+target = "purchase.checkout.block.render"
+
+# Read back the value the buyer already entered (cart metafield).
+[[extensions.metafields]]
+namespace = "custom"
+key = "date_of_birth"
