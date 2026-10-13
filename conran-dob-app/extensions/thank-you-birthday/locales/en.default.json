@@ -1,12 +1,5 @@
 {
   "heading": "When is your birthday?",
-  "description": "Add your birthday so we can celebrate with you.",
-  "month": "MM",
-  "day": "DD",
-  "year": "YYYY",
-  "save": "Save",
-  "saved": "Thank you! Your birthday is saved.",
-  "exists": "Thank you! We already have your birthday.",
-  "invalid": "Enter a valid date between 1900 and today",
-  "saveFailed": "We couldn't save your birthday right now. Please try again."
+  "description": "Sign in to your account and add your birthday so we can celebrate with you.",
+  "button": "Add my birthday"
 }
