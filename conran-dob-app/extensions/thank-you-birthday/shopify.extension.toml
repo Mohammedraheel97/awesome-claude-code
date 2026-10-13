@@ -1,0 +1,15 @@
+api_version = "2026-04"
+
+[[extensions]]
+name = "Thank you birthday"
+handle = "thank-you-birthday"
+type = "ui_extension"
+
+[[extensions.targeting]]
+module = "./src/ThankYou.jsx"
+target = "purchase.thank-you.block.render"
+
+# Needed to send the birthday to our server. Shopify requires this to be
+# requested once in the Partner Dashboard (API access requests).
+[extensions.capabilities]
+network_access = true
