@@ -6,6 +6,9 @@
   "label": "Date of birth",
   "cancel": "Cancel",
   "save": "Save",
-  "invalid": "Enter a date between 1900 and today",
-  "saveFailed": "We couldn't save your date of birth. Please try again."
+  "invalid": "Choose a valid day, month and year",
+  "saveFailed": "We couldn't save your date of birth. Please try again.",
+  "day": "Day",
+  "month": "Month",
+  "year": "Year"
 }
