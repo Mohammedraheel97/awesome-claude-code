@@ -1,0 +1,46 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: 48px; --pb: 72px">
+  <div class="page-width account">
+    <div class="account-head">
+      <h1 class="page-heading">{{ 'customer.account' | t }}</h1>
+      <a class="btn btn--outline" href="{{ routes.account_logout_url }}">{{ 'customer.logout' | t }}</a>
+    </div>
+    <div class="account-grid">
+      <div>
+        <h2 class="h-small">{{ 'customer.orders' | t }}</h2>
+        {%- paginate customer.orders by 20 -%}
+          {%- if customer.orders.size > 0 -%}
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>{{ 'customer.order' | t }}</th><th>{{ 'customer.date' | t }}</th><th>{{ 'customer.payment_status' | t }}</th><th>{{ 'customer.fulfillment_status' | t }}</th><th>{{ 'customer.total' | t }}</th></tr></thead>
+                <tbody>
+                  {%- for order in customer.orders -%}
+                    <tr>
+                      <td><a href="{{ order.customer_url }}">{{ order.name }}</a></td>
+                      <td>{{ order.created_at | time_tag: format: 'date' }}</td>
+                      <td>{{ order.financial_status_label }}</td>
+                      <td>{{ order.fulfillment_status_label }}</td>
+                      <td>{{ order.total_net_amount | money_with_currency }}</td>
+                    </tr>
+                  {%- endfor -%}
+                </tbody>
+              </table>
+            </div>
+            {% render 'pagination', paginate: paginate %}
+          {%- else -%}
+            <p class="muted">{{ 'customer.no_orders' | t }}</p>
+          {%- endif -%}
+        {%- endpaginate -%}
+      </div>
+      <aside class="account-card">
+        <h2 class="h-small">{{ 'customer.details' | t }}</h2>
+        <p>{{ customer.name }}<br>{{ customer.email }}</p>
+        {%- if customer.default_address -%}{{ customer.default_address | format_address }}{%- endif -%}
+        <a class="link-more" href="{{ routes.account_addresses_url }}">{{ 'customer.view_addresses' | t: count: customer.addresses_count }}</a>
+      </aside>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Account", "settings": [ { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" } ] }
+{% endschema %}

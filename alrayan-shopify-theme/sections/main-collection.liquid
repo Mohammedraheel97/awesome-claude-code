@@ -1,0 +1,121 @@
+{%- liquid
+  assign form_id = 'FacetsForm-' | append: section.id
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
+  assign has_filters = false
+  if section.settings.enable_filtering and collection.filters.size > 0
+    assign has_filters = true
+  endif
+  assign show_side = false
+  if section.settings.sidebar_menu != blank or has_filters
+    assign show_side = true
+  endif
+-%}
+{%- paginate collection.products by section.settings.products_per_page -%}
+  {%- if section.settings.show_banner -%}
+    {%- assign banner = collection.image | default: section.settings.fallback_image -%}
+    <section class="page-hero color-{{ section.settings.banner_scheme }}"{% if banner != blank %} style="--hero-img: url('{{ banner | image_url: width: 1920 }}'); --overlay: {{ section.settings.banner_overlay | divided_by: 100.0 }}"{% endif %}>
+      <div class="page-width page-hero-inner">
+        {%- if section.settings.show_breadcrumbs -%}
+          <nav class="crumbs" aria-label="{{ 'general.breadcrumbs' | t }}">
+            <a href="{{ routes.root_url }}">{{ 'general.home' | t }}</a><span aria-hidden="true">/</span>
+            <a href="{{ routes.collections_url }}">{{ 'collections.all_collections' | t }}</a><span aria-hidden="true">/</span>
+            <span aria-current="page">{{ collection.title | escape }}</span>
+          </nav>
+        {%- endif -%}
+        <h1>{{ collection.title | escape }}</h1>
+        {%- if section.settings.show_count -%}<p>{{ 'collections.products_count' | t: count: collection.products_count }}</p>{%- endif -%}
+        {%- if section.settings.show_description and collection.description != blank -%}<div class="rte page-hero-desc">{{ collection.description }}</div>{%- endif -%}
+      </div>
+    </section>
+  {%- else -%}
+    <div class="page-width page-title"><h1>{{ collection.title | escape }}</h1></div>
+  {%- endif -%}
+
+  <div class="color-{{ section.settings.color_scheme }}">
+    <div class="page-width shop-layout{% unless show_side %} shop-layout--full{% endunless %}" style="--cols: {{ section.settings.columns_desktop }}; --cols-m: {{ section.settings.columns_mobile }}">
+      {%- if show_side -%}
+        <aside class="shop-side">
+          {%- if section.settings.sidebar_menu != blank -%}
+            <h2 class="side-title">{{ section.settings.sidebar_title | escape }}</h2>
+            <nav class="side-nav">
+              {%- for link in section.settings.sidebar_menu.links -%}
+                <a href="{{ link.url }}"{% if link.active or link.url == collection.url %} aria-current="page"{% endif %}>
+                  <span class="side-cat">
+                    {%- if section.settings.sidebar_images and link.type == 'collection_link' and link.object.featured_image -%}
+                      {{ link.object.featured_image | image_url: width: 64 | image_tag: loading: 'lazy', alt: '' }}
+                    {%- endif -%}
+                    {{ link.title | escape }}
+                  </span>
+                  {%- if link.type == 'collection_link' -%}<small>{{ link.object.products_count }}</small>{%- endif -%}
+                </a>
+              {%- endfor -%}
+            </nav>
+          {%- endif -%}
+          {%- if has_filters -%}
+            <h2 class="side-title">{{ 'collections.filters' | t }}</h2>
+            {% render 'facets', results: collection, form_id: form_id, open: section.settings.filters_open %}
+          {%- endif -%}
+        </aside>
+      {%- endif -%}
+
+      <div class="shop-main">
+        <div class="toolbar">
+          <p class="result-count">{{ 'collections.products_count' | t: count: collection.products_count }}</p>
+          {%- if section.settings.enable_sorting -%}
+            <label class="sort"><span>{{ 'collections.sort_by' | t }}</span>
+              <select name="sort_by" data-sort{% if has_filters %} form="{{ form_id }}"{% endif %}>
+                {%- for option in collection.sort_options -%}
+                  <option value="{{ option.value | escape }}"{% if option.value == sort_by %} selected{% endif %}>{{ option.name | escape }}</option>
+                {%- endfor -%}
+              </select>
+            </label>
+          {%- endif -%}
+        </div>
+        {% render 'active-filters', results: collection, clear_url: collection.url %}
+
+        {%- if collection.products.size > 0 -%}
+          <div class="grid grid--fixed">
+            {%- for product in collection.products -%}
+              {%- if forloop.index <= 4 -%}{% render 'product-card', product: product, lazy: false %}{%- else -%}{% render 'product-card', product: product %}{%- endif -%}
+            {%- endfor -%}
+          </div>
+          {% render 'pagination', paginate: paginate %}
+        {%- else -%}
+          <div class="empty">
+            <p>{{ 'collections.no_products' | t }}</p>
+            <a class="btn" href="{{ collection.url }}">{{ 'collections.clear_all' | t }}</a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Collection page",
+  "class": "section-main-collection",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "header", "content": "Banner" },
+    { "type": "checkbox", "id": "show_banner", "label": "Show banner", "default": true },
+    { "type": "color_scheme", "id": "banner_scheme", "label": "Banner color scheme", "default": "scheme-4" },
+    { "type": "image_picker", "id": "fallback_image", "label": "Banner image when the collection has none" },
+    { "type": "range", "id": "banner_overlay", "label": "Banner image darkening", "min": 0, "max": 95, "step": 5, "unit": "%", "default": 75 },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "Show breadcrumbs", "default": true },
+    { "type": "checkbox", "id": "show_count", "label": "Show product count", "default": true },
+    { "type": "checkbox", "id": "show_description", "label": "Show collection description", "default": true },
+    { "type": "header", "content": "Sidebar" },
+    { "type": "link_list", "id": "sidebar_menu", "label": "Category menu", "info": "Pick a menu with your collections. Leave empty to hide." },
+    { "type": "text", "id": "sidebar_title", "label": "Menu heading", "default": "الأقسام" },
+    { "type": "checkbox", "id": "sidebar_images", "label": "Show collection images in the menu", "default": true },
+    { "type": "checkbox", "id": "enable_filtering", "label": "Enable filtering", "info": "Set up filters with the Shopify Search & Discovery app", "default": true },
+    { "type": "checkbox", "id": "filters_open", "label": "Expand filter groups", "default": false },
+    { "type": "header", "content": "Products" },
+    { "type": "checkbox", "id": "enable_sorting", "label": "Enable sorting", "default": true },
+    { "type": "range", "id": "products_per_page", "label": "Products per page", "min": 8, "max": 48, "step": 4, "default": 24 },
+    { "type": "range", "id": "columns_desktop", "label": "Products per row on desktop", "min": 2, "max": 6, "step": 1, "default": 4 },
+    { "type": "select", "id": "columns_mobile", "label": "Products per row on mobile", "default": "2", "options": [ { "value": "1", "label": "1" }, { "value": "2", "label": "2" } ] }
+  ]
+}
+{% endschema %}

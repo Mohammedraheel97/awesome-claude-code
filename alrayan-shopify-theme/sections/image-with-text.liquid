@@ -1,0 +1,65 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px">
+  <div class="page-width iwt iwt--{{ section.settings.layout }} iwt--{{ section.settings.image_width }}">
+    <div class="iwt-media iwt-media--{{ section.settings.ratio }}">
+      {%- if section.settings.image != blank -%}
+        {{ section.settings.image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '500,800,1100,1400', sizes: '(min-width: 750px) 50vw, 100vw', alt: section.settings.image.alt }}
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag: 'placeholder' }}
+      {%- endif -%}
+    </div>
+    <div class="iwt-copy iwt-copy--{{ section.settings.text_align }}">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'eyebrow' -%}<p class="eyebrow" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</p>
+          {%- when 'heading' -%}<h2 class="h-{{ block.settings.size }}" {{ block.shopify_attributes }}>{{ block.settings.heading }}</h2>
+          {%- when 'text' -%}<div class="rte" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+          {%- when 'buttons' -%}
+            <div class="btn-row" {{ block.shopify_attributes }}>
+              {%- if block.settings.label != blank -%}<a class="btn btn--lg btn--{{ block.settings.style }}" href="{{ block.settings.link | default: routes.all_products_collection_url }}">{{ block.settings.label | escape }}</a>{%- endif -%}
+              {%- if block.settings.label2 != blank -%}<a class="btn btn--lg btn--outline" href="{{ block.settings.link2 | default: routes.collections_url }}">{{ block.settings.label2 | escape }}</a>{%- endif -%}
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Image with text",
+  "class": "section-iwt",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-3" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "select", "id": "layout", "label": "Image position", "default": "image-first", "options": [ { "value": "image-first", "label": "Image first" }, { "value": "text-first", "label": "Text first" } ] },
+    { "type": "select", "id": "image_width", "label": "Image width", "default": "half", "options": [ { "value": "third", "label": "Small" }, { "value": "half", "label": "Half" }, { "value": "wide", "label": "Large" } ] },
+    { "type": "select", "id": "ratio", "label": "Image shape", "default": "landscape", "options": [ { "value": "landscape", "label": "Landscape" }, { "value": "square", "label": "Square" }, { "value": "portrait", "label": "Portrait" }, { "value": "adapt", "label": "Adapt to image" } ] },
+    { "type": "select", "id": "text_align", "label": "Text alignment", "default": "start", "options": [ { "value": "start", "label": "Start" }, { "value": "center", "label": "Center" } ] },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    { "type": "eyebrow", "name": "Eyebrow", "limit": 1, "settings": [ { "type": "text", "id": "text", "label": "Text", "default": "من محمصتنا" } ] },
+    {
+      "type": "heading", "name": "Heading", "limit": 2,
+      "settings": [
+        { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "قهوة محمصة طازجة بنكهة أصيلة" },
+        { "type": "select", "id": "size", "label": "Size", "default": "large", "options": [ { "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" } ] }
+      ]
+    },
+    { "type": "text", "name": "Text", "settings": [ { "type": "richtext", "id": "text", "label": "Text", "default": "<p>قهوة عربية وتركية بأوزان تناسبك، مع خيار الهيل — اختيارك الأول لأجود أنواع القهوة المحمصة.</p>" } ] },
+    {
+      "type": "buttons", "name": "Buttons", "limit": 1,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Button label", "default": "تسوق القهوة" },
+        { "type": "url", "id": "link", "label": "Button link" },
+        { "type": "select", "id": "style", "label": "Button style", "default": "solid", "options": [ { "value": "solid", "label": "Solid" }, { "value": "outline", "label": "Outline" } ] },
+        { "type": "text", "id": "label2", "label": "Second button label" },
+        { "type": "url", "id": "link2", "label": "Second button link" }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Image with text", "blocks": [ { "type": "eyebrow" }, { "type": "heading" }, { "type": "text" }, { "type": "buttons" } ] } ]
+}
+{% endschema %}

@@ -1,0 +1,49 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px">
+  <div class="page-width social-inner">
+    <div>
+      {%- if section.settings.heading != blank -%}<h2 class="h-small">{{ section.settings.heading }}</h2>{%- endif -%}
+      {%- if section.settings.text != blank -%}<p>{{ section.settings.text | escape }}</p>{%- endif -%}
+    </div>
+    <div class="social-buttons">
+      {%- for block in section.blocks -%}
+        <a class="social-btn" href="{{ block.settings.url }}" target="_blank" rel="noopener" {{ block.shopify_attributes }}>
+          {% render 'icon', name: block.settings.platform, size: 22 %}
+          {%- case block.settings.platform -%}
+            {%- when 'tiktok' -%}{%- assign platform_name = 'TikTok' -%}
+            {%- when 'youtube' -%}{%- assign platform_name = 'YouTube' -%}
+            {%- when 'whatsapp' -%}{%- assign platform_name = 'WhatsApp' -%}
+            {%- when 'x' -%}{%- assign platform_name = 'X' -%}
+            {%- else -%}{%- assign platform_name = block.settings.platform | capitalize -%}
+          {%- endcase -%}
+          <span><strong>{{ platform_name }}</strong>{%- if block.settings.handle != blank -%}<small dir="ltr">{{ block.settings.handle | escape }}</small>{%- endif -%}</span>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Social links",
+  "class": "section-social",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-4" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "تابعونا" },
+    { "type": "text", "id": "text", "label": "Text", "default": "جديد المنتجات والعروض أولًا بأول على حساباتنا." },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 36 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 36 }
+  ],
+  "blocks": [
+    {
+      "type": "link", "name": "Account",
+      "settings": [
+        { "type": "select", "id": "platform", "label": "Platform", "default": "instagram", "options": [ { "value": "instagram", "label": "Instagram" }, { "value": "tiktok", "label": "TikTok" }, { "value": "facebook", "label": "Facebook" }, { "value": "x", "label": "X" }, { "value": "snapchat", "label": "Snapchat" }, { "value": "youtube", "label": "YouTube" }, { "value": "whatsapp", "label": "WhatsApp" } ] },
+        { "type": "url", "id": "url", "label": "Link" },
+        { "type": "text", "id": "handle", "label": "Handle", "default": "@alrayan_roastery" }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Social links", "blocks": [ { "type": "link" }, { "type": "link", "settings": { "platform": "tiktok", "handle": "@alrayan_roastery.kw" } } ] } ]
+}
+{% endschema %}

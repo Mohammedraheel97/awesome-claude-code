@@ -1,0 +1,92 @@
+{%- liquid
+  assign slides = section.blocks
+-%}
+<section class="hero hero--{{ section.settings.height }} color-{{ section.settings.color_scheme }}{% if section.settings.ken_burns %} hero--zoom{% endif %}" data-slideshow data-autoplay="{{ section.settings.autoplay }}" data-speed="{{ section.settings.speed | times: 1000 }}" aria-roledescription="carousel" aria-label="{{ section.settings.label | escape }}" style="--hero-speed: {{ section.settings.speed }}s">
+  <div class="hero-track" data-track>
+    {%- for block in slides -%}
+      {%- liquid
+        assign overlay = block.settings.overlay | divided_by: 100.0
+        assign img = block.settings.image
+        assign img_m = block.settings.image_mobile | default: img
+      -%}
+      <div class="hero-slide hero-slide--{{ block.settings.align }}{% if forloop.first %} is-active{% endif %}" role="group" aria-roledescription="slide" aria-label="{{ forloop.index }} / {{ forloop.length }}" style="--overlay: {{ overlay }}; --hero-text: {{ block.settings.text_color }}" {{ block.shopify_attributes }}>
+        <div class="hero-media">
+          {%- if img != blank -%}
+            <picture>
+              {%- if block.settings.image_mobile != blank -%}<source media="(max-width: 749px)" srcset="{{ img_m | image_url: width: 750 }} 750w, {{ img_m | image_url: width: 1100 }} 1100w" sizes="100vw">{%- endif -%}
+              {%- if forloop.first -%}
+                {{ img | image_url: width: 2400 | image_tag: widths: '750,1100,1500,1920,2400', sizes: '100vw', fetchpriority: 'high', alt: img.alt }}
+              {%- else -%}
+                {{ img | image_url: width: 2400 | image_tag: widths: '750,1100,1500,1920,2400', sizes: '100vw', loading: 'lazy', alt: img.alt }}
+              {%- endif -%}
+            </picture>
+          {%- else -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder' }}
+          {%- endif -%}
+        </div>
+        <div class="page-width hero-copy">
+          {%- if block.settings.eyebrow != blank -%}<p class="eyebrow">{{ block.settings.eyebrow | escape }}</p>{%- endif -%}
+          {%- if block.settings.heading != blank -%}
+            {%- if forloop.first -%}<h1 class="hero-title">{{ block.settings.heading }}</h1>{%- else -%}<h2 class="hero-title">{{ block.settings.heading }}</h2>{%- endif -%}
+          {%- endif -%}
+          {%- if block.settings.text != blank -%}<div class="hero-text">{{ block.settings.text }}</div>{%- endif -%}
+          {%- if block.settings.button_label != blank or block.settings.button2_label != blank -%}
+            <div class="btn-row">
+              {%- if block.settings.button_label != blank -%}<a class="btn btn--lg" href="{{ block.settings.button_link | default: routes.all_products_collection_url }}">{{ block.settings.button_label | escape }}</a>{%- endif -%}
+              {%- if block.settings.button2_label != blank -%}<a class="btn btn--lg btn--ghost" href="{{ block.settings.button2_link | default: routes.collections_url }}">{{ block.settings.button2_label | escape }}</a>{%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+  {%- if slides.size > 1 -%}
+    {%- if section.settings.show_arrows -%}
+      <button class="hero-arrow hero-arrow--prev" type="button" data-prev aria-label="{{ 'general.previous' | t }}">{% render 'icon', name: 'chevron', size: 26 %}</button>
+      <button class="hero-arrow hero-arrow--next" type="button" data-next aria-label="{{ 'general.next' | t }}">{% render 'icon', name: 'chevron', size: 26 %}</button>
+    {%- endif -%}
+    {%- if section.settings.show_dots -%}
+      <div class="hero-dots" data-dots>
+        {%- for block in slides -%}<button type="button" data-dot="{{ forloop.index0 }}" aria-label="{{ 'general.slide' | t: n: forloop.index }}"{% if forloop.first %} aria-current="true"{% endif %}><span></span></button>{%- endfor -%}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Hero slideshow",
+  "class": "section-hero",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-4" },
+    { "type": "select", "id": "height", "label": "Height", "default": "large", "options": [ { "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" }, { "value": "full", "label": "Full screen" } ] },
+    { "type": "checkbox", "id": "autoplay", "label": "Auto-rotate slides", "default": true },
+    { "type": "range", "id": "speed", "label": "Seconds per slide", "min": 3, "max": 12, "step": 1, "default": 6 },
+    { "type": "checkbox", "id": "ken_burns", "label": "Slow zoom on images", "default": true },
+    { "type": "checkbox", "id": "show_arrows", "label": "Show arrows", "default": true },
+    { "type": "checkbox", "id": "show_dots", "label": "Show progress dots", "default": true },
+    { "type": "text", "id": "label", "label": "Accessible name", "default": "Highlights" }
+  ],
+  "blocks": [
+    {
+      "type": "slide", "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "1920 × 900px or larger" },
+        { "type": "image_picker", "id": "image_mobile", "label": "Mobile image (optional)" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "المونة البيتية" },
+        { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "من الشجر إلى الحجر" },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>زيت الزيتون والزيتون الفاخر، والمربيات والمخللات الطبيعية 100%</p>" },
+        { "type": "text", "id": "button_label", "label": "Button label", "default": "تسوق الآن" },
+        { "type": "url", "id": "button_link", "label": "Button link" },
+        { "type": "text", "id": "button2_label", "label": "Second button label", "default": "جميع الأقسام" },
+        { "type": "url", "id": "button2_link", "label": "Second button link" },
+        { "type": "select", "id": "align", "label": "Text position", "default": "start", "options": [ { "value": "start", "label": "Start" }, { "value": "center", "label": "Center" }, { "value": "end", "label": "End" } ] },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#FFFFFF" },
+        { "type": "range", "id": "overlay", "label": "Image darkening", "min": 0, "max": 90, "step": 5, "unit": "%", "default": 55 }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Hero slideshow", "blocks": [ { "type": "slide" }, { "type": "slide", "settings": { "eyebrow": "مكسرات طازجة", "heading": "مكسرات فاخرة بنكهات الريان", "text": "<p>أجود أنواع المكسرات النية والمحمصة، وخلطات مميزة لكل المناسبات</p>" } } ] } ]
+}
+{% endschema %}

@@ -1,0 +1,63 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: 40px; --pb: 64px">
+  <div class="page-width">
+    <h1 class="page-heading">{{ 'cart.title' | t }}</h1>
+    {%- if cart.item_count > 0 -%}
+      <form class="cart-page" action="{{ routes.cart_url }}" method="post" id="CartPageForm" data-cart-page>
+        <div class="cart-table">
+          {%- for item in cart.items -%}
+            <div class="cart-row">
+              <a class="cart-row-img" href="{{ item.url }}">{%- if item.image -%}{{ item.image | image_url: width: 240 | image_tag: loading: 'lazy', alt: '' }}{%- endif -%}</a>
+              <div class="cart-row-info">
+                <a class="line-title" href="{{ item.url }}">{{ item.product.title | escape }}</a>
+                {%- unless item.product.has_only_default_variant -%}<small class="muted">{{ item.variant.title | escape }}</small>{%- endunless -%}
+                {%- for p in item.properties -%}{%- unless p.last == blank or p.first contains '_' -%}<small class="muted">{{ p.first }}: {{ p.last }}</small>{%- endunless -%}{%- endfor -%}
+                <span class="muted small">{{ item.final_price | money }}</span>
+                <a class="link-remove" href="{{ item.url_to_remove }}">{{ 'cart.remove' | t }}</a>
+              </div>
+              <div class="qty" data-qty>
+                <button type="button" data-qty-step="-1" aria-label="{{ 'products.decrease' | t }}">{% render 'icon', name: 'minus', size: 16 %}</button>
+                <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" inputmode="numeric" aria-label="{{ 'products.quantity' | t }}" data-autosubmit>
+                <button type="button" data-qty-step="1" aria-label="{{ 'products.increase' | t }}">{% render 'icon', name: 'plus', size: 16 %}</button>
+              </div>
+              <div class="cart-row-total price">{{ item.final_line_price | money }}</div>
+            </div>
+          {%- endfor -%}
+        </div>
+        <div class="cart-summary">
+          {%- if settings.cart_note -%}
+            <label class="field"><span>{{ 'cart.note' | t }}</span><textarea name="note" rows="3">{{ cart.note }}</textarea></label>
+          {%- endif -%}
+          {%- for discount in cart.cart_level_discount_applications -%}
+            <div class="totals-row"><span>{{ discount.title | escape }}</span><span>-{{ discount.total_allocated_amount | money }}</span></div>
+          {%- endfor -%}
+          <div class="totals-row totals-row--grand"><span>{{ 'cart.subtotal' | t }}</span><span>{{ cart.total_price | money_with_currency }}</span></div>
+          <p class="muted small">{{ 'cart.taxes_note' | t }}</p>
+          <noscript><button class="btn btn--outline btn--block" type="submit" name="update">{{ 'cart.update' | t }}</button></noscript>
+          <button class="btn btn--lg btn--block" type="submit" name="checkout">{{ 'cart.checkout' | t }}</button>
+          {%- if additional_checkout_buttons and section.settings.show_additional -%}<div class="additional-checkout">{{ content_for_additional_checkout_buttons }}</div>{%- endif -%}
+          {%- if settings.cart_whatsapp and settings.whatsapp_number != blank -%}
+            <button class="btn btn--lg btn--block btn--whatsapp" type="button" data-whatsapp-cart>{% render 'icon', name: 'whatsapp', size: 20 %} {{ 'cart.whatsapp_checkout' | t }}</button>
+          {%- endif -%}
+          <a class="link-plain" href="{{ routes.all_products_collection_url }}">{{ 'cart.continue_shopping' | t }}</a>
+        </div>
+      </form>
+    {%- else -%}
+      <div class="cart-empty">
+        {% render 'icon', name: 'cart', size: 64 %}
+        <p>{{ 'cart.empty' | t }}</p>
+        <a class="btn btn--lg" href="{{ routes.all_products_collection_url }}">{{ 'cart.continue_shopping' | t }}</a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Cart page",
+  "class": "section-main-cart",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "show_additional", "label": "Show accelerated checkout buttons (Apple Pay, etc.)", "default": true }
+  ]
+}
+{% endschema %}

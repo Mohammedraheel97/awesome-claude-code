@@ -1,0 +1,39 @@
+{
+  "type": "header",
+  "name": "Header group",
+  "sections": {
+    "announcement": {
+      "type": "announcement-bar",
+      "blocks": {
+        "msg": {
+          "type": "announcement",
+          "settings": {
+            "text": "خصم 15% على الطلبات من 6 د.ك فما فوق — استخدم الكود",
+            "code": "15OFF"
+          }
+        }
+      },
+      "block_order": [
+        "msg"
+      ],
+      "settings": {
+        "color_scheme": "scheme-4",
+        "phone": "+965 9228 6230"
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "color_scheme": "scheme-3",
+        "dropdown_scheme": "scheme-2",
+        "menu": "main-menu",
+        "brand_name": "الريان",
+        "tagline": "مطحنة ومحمصة"
+      }
+    }
+  },
+  "order": [
+    "announcement",
+    "header"
+  ]
+}

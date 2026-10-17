@@ -1,0 +1,29 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px">
+  <div class="page-width narrow" style="--max: 70ch">
+    {%- if section.settings.heading != blank -%}<h2 class="h-medium">{{ section.settings.heading }}</h2>{%- endif -%}
+    {%- assign form_id = 'ContactForm-' | append: section.id -%}
+    {%- form 'contact', id: form_id, class: 'form-grid' -%}
+      {%- if form.posted_successfully? -%}<p class="form-success">{{ 'contact.success' | t }}</p>{%- endif -%}
+      {%- if form.errors -%}<p class="form-error">{{ form.errors | default_errors }}</p>{%- endif -%}
+      <label class="field"><span>{{ 'contact.name' | t }}</span><input type="text" name="contact[name]" autocomplete="name" value="{{ form.name }}"></label>
+      <label class="field"><span>{{ 'contact.email' | t }} *</span><input type="email" name="contact[email]" autocomplete="email" required value="{{ form.email }}"></label>
+      <label class="field"><span>{{ 'contact.phone' | t }}</span><input type="tel" name="contact[phone]" autocomplete="tel" value="{{ form.phone }}"></label>
+      <label class="field field--full"><span>{{ 'contact.message' | t }}</span><textarea name="contact[body]" rows="6">{{ form.body }}</textarea></label>
+      <button class="btn btn--lg" type="submit">{{ 'contact.send' | t }}</button>
+    {%- endform -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Contact form",
+  "class": "section-contact",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "تواصل معنا" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "presets": [ { "name": "Contact form" } ]
+}
+{% endschema %}

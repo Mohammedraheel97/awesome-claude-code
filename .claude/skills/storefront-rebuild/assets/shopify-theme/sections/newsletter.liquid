@@ -1,0 +1,32 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px">
+  <div class="page-width newsletter">
+    {%- if section.settings.heading != blank -%}<h2 class="h-medium">{{ section.settings.heading }}</h2>{%- endif -%}
+    {%- if section.settings.text != blank -%}<div class="rte">{{ section.settings.text }}</div>{%- endif -%}
+    {%- assign form_id = 'Newsletter-' | append: section.id -%}
+    {%- form 'customer', class: 'newsletter-form', id: form_id -%}
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      <div class="input-row">
+        <label class="visually-hidden" for="NewsletterEmail-{{ section.id }}">{{ 'newsletter.email' | t }}</label>
+        <input id="NewsletterEmail-{{ section.id }}" type="email" name="contact[email]" required autocomplete="email" placeholder="{{ 'newsletter.email' | t }}">
+        <button class="btn" type="submit">{{ 'newsletter.subscribe' | t }}</button>
+      </div>
+      {%- if form.posted_successfully? -%}<p class="form-success">{{ 'newsletter.success' | t }}</p>{%- endif -%}
+      {%- if form.errors -%}<p class="form-error">{{ form.errors | default_errors }}</p>{%- endif -%}
+    {%- endform -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "class": "section-newsletter",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-5" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "اشترك في النشرة البريدية" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>كن أول من يعرف عن المنتجات الجديدة والعروض.</p>" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "presets": [ { "name": "Newsletter" } ]
+}
+{% endschema %}

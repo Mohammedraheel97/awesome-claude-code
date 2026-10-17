@@ -1,0 +1,16 @@
+    <div class="wrap">
+      <nav class="crumbs dark" aria-label="breadcrumb" id="crumbs"><a href="/" data-i18n="home">الرئيسية</a><span aria-hidden="true">/</span><a href="{{cat_url}}">{{cat_name}}</a><span aria-hidden="true">/</span><span>{{name}}</span></nav>
+    </div>
+    <section class="wrap pdp" id="pdp">
+      <div class="pdp-media"><div class="zoom" id="zoom"><img src="/{{img}}" alt="{{name}}" id="pdpImg" width="640" height="640"></div></div>
+      <div class="pdp-info" id="pdpInfo"><h1>{{name}}</h1></div>
+    </section>
+    <section class="wrap section" id="relatedSec" aria-labelledby="relatedTitle">
+      <div class="section-head"><div><span class="eyebrow" data-i18n="youMayLike">قد يعجبك أيضًا</span><h2 id="relatedTitle" data-i18n="related">منتجات من نفس القسم</h2></div><a class="link-more" href="{{cat_url}}" data-i18n="viewAllArrow">عرض الكل ←</a></div>
+      <div class="carousel" id="relatedRail"></div>
+    </section>
+    <section class="wrap section" id="recentSec" aria-labelledby="recentTitle" hidden>
+      <div class="section-head"><h2 id="recentTitle" data-i18n="recent">شاهدتها مؤخرًا</h2></div>
+      <div class="carousel" id="recentRail"></div>
+    </section>
+    <div class="sticky-buy" id="stickyBuy" hidden></div>

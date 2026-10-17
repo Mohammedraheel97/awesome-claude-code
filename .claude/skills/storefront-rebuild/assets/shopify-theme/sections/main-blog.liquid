@@ -1,0 +1,48 @@
+{%- paginate blog.articles by section.settings.per_page -%}
+  <section class="page-hero color-{{ section.settings.banner_scheme }}">
+    <div class="page-width page-hero-inner">
+      <h1>{{ blog.title | escape }}</h1>
+      {%- if section.settings.show_tags and blog.all_tags.size > 0 -%}
+        <div class="chips chips--light">
+          <a class="chip{% unless current_tags %} chip--active{% endunless %}" href="{{ blog.url }}">{{ 'general.all' | t }}</a>
+          {%- for tag in blog.all_tags -%}<a class="chip{% if current_tags contains tag %} chip--active{% endif %}" href="{{ blog.url }}/tagged/{{ tag | handleize }}">{{ tag | escape }}</a>{%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+  <section class="section color-{{ section.settings.color_scheme }}" style="--pt: 48px; --pb: 64px; --cols: {{ section.settings.columns }}">
+    <div class="page-width">
+      <div class="article-grid">
+        {%- for article in blog.articles -%}
+          <a class="article-card" href="{{ article.url }}">
+            <span class="article-media">
+              {%- if article.image -%}{{ article.image | image_url: width: 900 | image_tag: loading: 'lazy', widths: '400,600,900', sizes: '(min-width: 990px) 33vw, 100vw', alt: article.image.alt | default: article.title }}{%- else -%}{{ 'image' | placeholder_svg_tag: 'placeholder' }}{%- endif -%}
+            </span>
+            <span class="article-body">
+              {%- if section.settings.show_date -%}<small class="muted">{{ article.published_at | time_tag: format: 'date' }}</small>{%- endif -%}
+              <strong>{{ article.title | escape }}</strong>
+              <span class="muted">{{ article.excerpt_or_content | strip_html | truncatewords: 24 }}</span>
+              <span class="link-more">{{ 'blogs.read_more' | t }} {% render 'icon', name: 'arrow', size: 16 %}</span>
+            </span>
+          </a>
+        {%- endfor -%}
+      </div>
+      {% render 'pagination', paginate: paginate %}
+    </div>
+  </section>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Blog posts",
+  "class": "section-main-blog",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "color_scheme", "id": "banner_scheme", "label": "Banner color scheme", "default": "scheme-4" },
+    { "type": "range", "id": "per_page", "label": "Posts per page", "min": 3, "max": 24, "step": 3, "default": 9 },
+    { "type": "range", "id": "columns", "label": "Columns on desktop", "min": 1, "max": 4, "step": 1, "default": 3 },
+    { "type": "checkbox", "id": "show_date", "label": "Show date", "default": true },
+    { "type": "checkbox", "id": "show_tags", "label": "Show tag filter", "default": true }
+  ]
+}
+{% endschema %}

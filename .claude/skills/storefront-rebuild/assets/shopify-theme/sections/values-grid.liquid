@@ -1,0 +1,61 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px; --cols: {{ section.settings.columns }}">
+  <div class="page-width">
+    {% render 'section-heading', eyebrow: section.settings.eyebrow, heading: section.settings.heading, align: section.settings.align, size: 'medium' %}
+    <div class="values-grid values--{{ section.settings.style }}">
+      {%- for block in section.blocks -%}
+        <article {{ block.shopify_attributes }}>
+          {%- if block.settings.image != blank -%}
+            <div class="v-img">{{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy', widths: '300,450,600', sizes: '(min-width: 750px) 25vw, 100vw', alt: block.settings.image.alt }}</div>
+          {%- elsif section.settings.numbered -%}
+            <span class="v-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+          {%- endif -%}
+          {%- if block.settings.title != blank -%}<h3>{{ block.settings.title | escape }}</h3>{%- endif -%}
+          {%- if block.settings.text != blank -%}<div class="rte">{{ block.settings.text }}</div>{%- endif -%}
+          {%- if block.settings.link_label != blank -%}<a class="link-more" href="{{ block.settings.link }}">{{ block.settings.link_label | escape }} {% render 'icon', name: 'arrow', size: 16 %}</a>{%- endif -%}
+        </article>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Values / multicolumn",
+  "class": "section-values",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-5" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "لماذا الريان" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "جودة تستحق ثقتك" },
+    { "type": "select", "id": "align", "label": "Heading alignment", "default": "center", "options": [ { "value": "start", "label": "Start" }, { "value": "center", "label": "Center" } ] },
+    { "type": "range", "id": "columns", "label": "Columns on desktop", "min": 1, "max": 5, "step": 1, "default": 4 },
+    { "type": "select", "id": "style", "label": "Card style", "default": "card", "options": [ { "value": "card", "label": "Cards" }, { "value": "plain", "label": "Plain" } ] },
+    { "type": "checkbox", "id": "numbered", "label": "Number the columns", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "column", "name": "Column",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image (optional)" },
+        { "type": "text", "id": "title", "label": "Title", "default": "تحميص وطحن يومي" },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>نحمّص القهوة والمكسرات ونطحن البهارات في محلنا لتصلك بأفضل نكهة.</p>" },
+        { "type": "text", "id": "link_label", "label": "Link label" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Values / multicolumn",
+      "blocks": [
+        { "type": "column" },
+        { "type": "column", "settings": { "title": "نكهات الريان الفريدة", "text": "<p>مكسرات بنكهات مميزة: مدخن، حامض، جبنة، ترافل، باربيكيو وأكثر.</p>" } },
+        { "type": "column", "settings": { "title": "من الشجر إلى الحجر", "text": "<p>زيت زيتون وزيتون فاخر، ومربيات ومخللات طبيعية 100%.</p>" } },
+        { "type": "column", "settings": { "title": "كل ما يلزمك في مكان واحد", "text": "<p>فواكه مجففة، حبوب وبقوليات، حلويات ومتة — أكثر من 200 منتج.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,8 @@
+{%- if settings.whatsapp_float and settings.whatsapp_number != blank -%}
+  {%- assign wa_label = 'general.need_help' | t -%}
+  {%- if settings.whatsapp_float_label != blank -%}{%- assign wa_label = settings.whatsapp_float_label -%}{%- endif -%}
+  <a class="wa-float wa-float--{{ settings.whatsapp_float_side }}" href="https://wa.me/{{ settings.whatsapp_number | remove: '+' | remove: ' ' }}" target="_blank" rel="noopener" aria-label="WhatsApp">
+    {% render 'icon', name: 'whatsapp', size: 22 %}
+    <span>{{ wa_label | escape }}</span>
+  </a>
+{%- endif -%}

@@ -1,0 +1,68 @@
+{%- liquid
+  case section.settings.sort
+    when 'products_high'
+      assign sorted = collections | sort: 'all_products_count' | reverse
+    when 'products_low'
+      assign sorted = collections | sort: 'all_products_count'
+    when 'date'
+      assign sorted = collections | sort: 'published_at' | reverse
+    when 'alphabetical'
+      assign sorted = collections | sort: 'title'
+    else
+      assign sorted = collections
+  endcase
+-%}
+<section class="page-hero color-{{ section.settings.banner_scheme }}"{% if section.settings.banner_image != blank %} style="--hero-img: url('{{ section.settings.banner_image | image_url: width: 1920 }}'); --overlay: .75"{% endif %}>
+  <div class="page-width page-hero-inner">
+    <nav class="crumbs" aria-label="{{ 'general.breadcrumbs' | t }}"><a href="{{ routes.root_url }}">{{ 'general.home' | t }}</a><span aria-hidden="true">/</span><span aria-current="page">{{ section.settings.title | escape }}</span></nav>
+    <h1>{{ section.settings.title | escape }}</h1>
+    {%- if section.settings.subtitle != blank -%}<p>{{ section.settings.subtitle | escape }}</p>{%- endif -%}
+  </div>
+</section>
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: 48px; --pb: 64px; --cols: {{ section.settings.columns }}">
+  <div class="page-width coll-grid">
+    {%- if section.settings.show_all_card -%}
+      <a class="coll-card coll-card--all" href="{{ routes.all_products_collection_url }}">
+        <span class="coll-body"><strong>{{ 'collections.all_products' | t }}</strong><span class="coll-cta">{{ 'general.view_all' | t }} {% render 'icon', name: 'arrow', size: 16 %}</span></span>
+      </a>
+    {%- endif -%}
+    {%- for c in sorted -%}
+      {%- if c.handle == 'all' or c.handle == 'frontpage' -%}{%- continue -%}{%- endif -%}
+      <a class="coll-card" href="{{ c.url }}">
+        <span class="coll-media coll-media--{{ section.settings.image_ratio }}">
+          {%- if c.featured_image -%}
+            {{ c.featured_image | image_url: width: 700 | image_tag: loading: 'lazy', widths: '300,450,600,700', sizes: '(min-width: 990px) 25vw, 50vw', alt: '' }}
+          {%- else -%}
+            {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
+          {%- endif -%}
+        </span>
+        <span class="coll-body">
+          <strong>{{ c.title | escape }}</strong>
+          {%- if section.settings.show_count -%}<small>{{ 'collections.products_count' | t: count: c.products_count }}</small>{%- endif -%}
+          {%- if section.settings.show_description and c.description != blank -%}<span class="coll-desc">{{ c.description | strip_html | truncatewords: 16 }}</span>{%- endif -%}
+          <span class="coll-cta">{{ 'collections.shop_collection' | t }} {% render 'icon', name: 'arrow', size: 16 %}</span>
+        </span>
+      </a>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collections list page",
+  "class": "section-main-list-collections",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "color_scheme", "id": "banner_scheme", "label": "Banner color scheme", "default": "scheme-4" },
+    { "type": "image_picker", "id": "banner_image", "label": "Banner image" },
+    { "type": "text", "id": "title", "label": "Title", "default": "جميع الأقسام" },
+    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "تصفح أقسامنا: القهوة، المكسرات، البهارات، الحلويات، المونة وأكثر." },
+    { "type": "select", "id": "sort", "label": "Sort collections", "default": "alphabetical", "options": [ { "value": "default", "label": "Store default" }, { "value": "alphabetical", "label": "Alphabetically" }, { "value": "date", "label": "Newest first" }, { "value": "products_high", "label": "Most products first" }, { "value": "products_low", "label": "Fewest products first" } ] },
+    { "type": "range", "id": "columns", "label": "Columns on desktop", "min": 2, "max": 5, "step": 1, "default": 4 },
+    { "type": "select", "id": "image_ratio", "label": "Image shape", "default": "landscape", "options": [ { "value": "landscape", "label": "Landscape" }, { "value": "square", "label": "Square" }, { "value": "portrait", "label": "Portrait" } ] },
+    { "type": "checkbox", "id": "show_all_card", "label": "Show \"All products\" card", "default": true },
+    { "type": "checkbox", "id": "show_count", "label": "Show product count", "default": true },
+    { "type": "checkbox", "id": "show_description", "label": "Show description", "default": false }
+  ]
+}
+{% endschema %}

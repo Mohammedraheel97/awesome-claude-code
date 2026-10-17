@@ -1,0 +1,15 @@
+{%- comment -%}
+  Eyebrow + heading + optional "view all" link shared by content sections.
+  Accepts: eyebrow {String}, heading {String}, align {String} 'start'|'center', size {String}, link_label {String}, link_url {String}
+{%- endcomment -%}
+{%- if eyebrow != blank or heading != blank or link_label != blank -%}
+  <div class="section-head section-head--{{ align | default: 'start' }}">
+    <div>
+      {%- if eyebrow != blank -%}<p class="eyebrow">{{ eyebrow | escape }}</p>{%- endif -%}
+      {%- if heading != blank -%}<h2 class="h-{{ size | default: 'medium' }}">{{ heading }}</h2>{%- endif -%}
+    </div>
+    {%- if link_label != blank and link_url != blank -%}
+      <a class="link-more" href="{{ link_url }}">{{ link_label | escape }} {% render 'icon', name: 'arrow', size: 18 %}</a>
+    {%- endif -%}
+  </div>
+{%- endif -%}

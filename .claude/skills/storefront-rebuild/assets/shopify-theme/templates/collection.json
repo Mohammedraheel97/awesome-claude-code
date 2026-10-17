@@ -1,0 +1,48 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "settings": {
+        "show_banner": true,
+        "banner_scheme": "scheme-4",
+        "sidebar_title": "الأقسام",
+        "enable_filtering": true,
+        "products_per_page": 24,
+        "columns_desktop": 4,
+        "columns_mobile": "2"
+      }
+    },
+    "social": {
+      "type": "social-band",
+      "blocks": {
+        "s1": {
+          "type": "link",
+          "settings": {
+            "platform": "instagram",
+            "url": "https://www.instagram.com/alrayan_roastery",
+            "handle": "@alrayan_roastery"
+          }
+        },
+        "s2": {
+          "type": "link",
+          "settings": {
+            "platform": "tiktok",
+            "url": "https://www.tiktok.com/@alrayan_roastery.kw",
+            "handle": "@alrayan_roastery.kw"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2"
+      ],
+      "settings": {
+        "color_scheme": "scheme-4"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "social"
+  ]
+}

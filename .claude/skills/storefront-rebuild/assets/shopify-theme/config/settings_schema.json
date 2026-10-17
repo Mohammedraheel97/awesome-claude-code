@@ -1,0 +1,164 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Alrayan",
+    "theme_version": "1.0.0",
+    "theme_author": "Alrayan Mills & Roastery",
+    "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
+    "theme_support_url": "https://help.shopify.com/manual/online-store/themes"
+  },
+  {
+    "name": "Logo & favicon",
+    "settings": [
+      { "type": "image_picker", "id": "logo", "label": "Logo" },
+      { "type": "range", "id": "logo_width", "label": "Logo width", "min": 40, "max": 220, "step": 2, "unit": "px", "default": 64 },
+      { "type": "checkbox", "id": "logo_circle", "label": "Show logo inside a white circle", "default": true },
+      { "type": "image_picker", "id": "favicon", "label": "Favicon", "info": "32 × 32px .png recommended" }
+    ]
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color_scheme_group",
+        "id": "color_schemes",
+        "definition": [
+          { "type": "color", "id": "background", "label": "Background", "default": "#FFF6F5" },
+          { "type": "color", "id": "surface", "label": "Cards & panels", "default": "#FFFFFF" },
+          { "type": "color", "id": "surface_text", "label": "Text on cards & panels", "default": "#2B1012" },
+          { "type": "color", "id": "surface_accent", "label": "Accent on cards & panels", "default": "#BD2932" },
+          { "type": "color", "id": "text", "label": "Text", "default": "#2B1012" },
+          { "type": "color", "id": "accent", "label": "Accent (buttons, prices, links)", "default": "#BD2932" },
+          { "type": "color", "id": "accent_hover", "label": "Accent hover", "default": "#9A1F27" },
+          { "type": "color", "id": "on_accent", "label": "Text on accent", "default": "#FFFFFF" },
+          { "type": "color", "id": "border", "label": "Borders", "default": "#F3D2D0" }
+        ],
+        "role": {
+          "background": "background",
+          "text": "text",
+          "primary_button": "accent",
+          "on_primary_button": "on_accent",
+          "primary_button_border": "accent",
+          "secondary_button": "surface",
+          "on_secondary_button": "accent",
+          "secondary_button_border": "accent",
+          "icons": "text",
+          "links": "accent"
+        }
+      },
+      { "type": "header", "content": "Badges" },
+      { "type": "color", "id": "badge_sale_bg", "label": "Sale badge", "default": "#BD2932" },
+      { "type": "color", "id": "badge_new_bg", "label": "New badge", "default": "#2B1012" },
+      { "type": "color", "id": "badge_soldout_bg", "label": "Sold out badge", "default": "#8B7D7D" },
+      { "type": "color", "id": "whatsapp_color", "label": "WhatsApp buttons", "default": "#1FA855" }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      { "type": "header", "content": "Latin text" },
+      { "type": "font_picker", "id": "type_heading_font", "label": "Heading font", "default": "barlow_condensed_n6" },
+      { "type": "font_picker", "id": "type_body_font", "label": "Body font", "default": "inter_n4" },
+      { "type": "header", "content": "Arabic text", "info": "Loaded from Google Fonts. Used first on right-to-left pages and as a fallback for Arabic characters everywhere." },
+      {
+        "type": "select", "id": "arabic_heading_font", "label": "Arabic heading font", "default": "Cairo",
+        "options": [
+          { "value": "Cairo", "label": "Cairo" }, { "value": "Tajawal", "label": "Tajawal" }, { "value": "Almarai", "label": "Almarai" },
+          { "value": "Noto Sans Arabic", "label": "Noto Sans Arabic" }, { "value": "IBM Plex Sans Arabic", "label": "IBM Plex Sans Arabic" },
+          { "value": "Readex Pro", "label": "Readex Pro" }, { "value": "Amiri", "label": "Amiri (serif)" }, { "value": "none", "label": "None (use Latin fonts)" }
+        ]
+      },
+      {
+        "type": "select", "id": "arabic_body_font", "label": "Arabic body font", "default": "Noto Sans Arabic",
+        "options": [
+          { "value": "Noto Sans Arabic", "label": "Noto Sans Arabic" }, { "value": "Cairo", "label": "Cairo" }, { "value": "Tajawal", "label": "Tajawal" },
+          { "value": "Almarai", "label": "Almarai" }, { "value": "IBM Plex Sans Arabic", "label": "IBM Plex Sans Arabic" }, { "value": "Readex Pro", "label": "Readex Pro" },
+          { "value": "none", "label": "None (use Latin fonts)" }
+        ]
+      },
+      { "type": "header", "content": "Sizes" },
+      { "type": "range", "id": "heading_scale", "label": "Heading size", "min": 80, "max": 140, "step": 5, "unit": "%", "default": 100 },
+      { "type": "range", "id": "body_scale", "label": "Body text size", "min": 90, "max": 120, "step": 5, "unit": "%", "default": 100 },
+      {
+        "type": "select", "id": "text_direction", "label": "Text direction", "default": "auto",
+        "options": [
+          { "value": "auto", "label": "Automatic (right-to-left for Arabic, Hebrew, Persian, Urdu)" },
+          { "value": "rtl", "label": "Always right-to-left" },
+          { "value": "ltr", "label": "Always left-to-right" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      { "type": "range", "id": "page_width", "label": "Page width", "min": 1000, "max": 1600, "step": 20, "unit": "px", "default": 1240 },
+      { "type": "range", "id": "section_spacing", "label": "Default space between sections", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 0 },
+      { "type": "range", "id": "button_radius", "label": "Button corner radius", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 8 },
+      { "type": "range", "id": "card_radius", "label": "Card corner radius", "min": 0, "max": 32, "step": 1, "unit": "px", "default": 16 },
+      { "type": "range", "id": "image_radius", "label": "Banner & image corner radius", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 24 },
+      { "type": "checkbox", "id": "card_shadow", "label": "Soft shadows on cards", "default": true },
+      { "type": "checkbox", "id": "animations", "label": "Hover & reveal animations", "default": true }
+    ]
+  },
+  {
+    "name": "Product cards",
+    "settings": [
+      {
+        "type": "select", "id": "card_image_ratio", "label": "Image ratio", "default": "square",
+        "options": [ { "value": "square", "label": "Square" }, { "value": "portrait", "label": "Portrait" }, { "value": "landscape", "label": "Landscape" } ]
+      },
+      { "type": "select", "id": "card_image_fit", "label": "Image fit", "default": "contain", "options": [ { "value": "contain", "label": "Show whole image" }, { "value": "cover", "label": "Fill the frame" } ] },
+      { "type": "range", "id": "card_image_padding", "label": "Image padding", "min": 0, "max": 32, "step": 2, "unit": "px", "default": 12 },
+      { "type": "checkbox", "id": "card_secondary_image", "label": "Show second image on hover", "default": true },
+      { "type": "checkbox", "id": "card_show_vendor", "label": "Show vendor", "default": false },
+      { "type": "checkbox", "id": "card_quick_add", "label": "Show add to cart button", "default": true },
+      {
+        "type": "select", "id": "card_button_style", "label": "Button style", "default": "solid",
+        "options": [ { "value": "solid", "label": "Solid" }, { "value": "soft", "label": "Soft" }, { "value": "outline", "label": "Outline" } ]
+      },
+      { "type": "range", "id": "card_title_lines", "label": "Title lines", "min": 1, "max": 3, "step": 1, "default": 2 },
+      { "type": "header", "content": "Badges" },
+      { "type": "checkbox", "id": "badge_sale", "label": "Show sale badge with % off", "default": true },
+      { "type": "checkbox", "id": "badge_soldout", "label": "Show sold out badge", "default": true },
+      { "type": "text", "id": "badge_new_tag", "label": "Show \"New\" badge on products tagged", "default": "new" }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      { "type": "select", "id": "cart_type", "label": "After adding to cart", "default": "drawer", "options": [ { "value": "drawer", "label": "Open cart drawer" }, { "value": "page", "label": "Go to cart page" } ] },
+      { "type": "checkbox", "id": "cart_note", "label": "Show order note", "default": true },
+      { "type": "header", "content": "Progress bar" },
+      { "type": "checkbox", "id": "cart_progress", "label": "Show progress bar", "default": true },
+      { "type": "number", "id": "cart_progress_threshold", "label": "Goal amount", "info": "In your store currency, e.g. 6", "default": 6 },
+      { "type": "text", "id": "cart_progress_text", "label": "Message below goal", "info": "Use [amount] for the remaining amount", "default": "Add [amount] more to get 15% off with code 15OFF" },
+      { "type": "text", "id": "cart_progress_done", "label": "Message when goal is reached", "default": "Your order qualifies for 15% off — use code 15OFF at checkout" },
+      { "type": "header", "content": "WhatsApp checkout" },
+      { "type": "checkbox", "id": "cart_whatsapp", "label": "Show \"Order via WhatsApp\" button", "info": "Sends the cart as a message to the WhatsApp number in Social media & contact", "default": true }
+    ]
+  },
+  {
+    "name": "Social media & contact",
+    "settings": [
+      { "type": "text", "id": "whatsapp_number", "label": "WhatsApp number", "info": "International format without +, e.g. 96592286229", "default": "96592286229" },
+      { "type": "checkbox", "id": "whatsapp_float", "label": "Show floating WhatsApp button", "default": true },
+      { "type": "text", "id": "whatsapp_float_label", "label": "Floating button label", "info": "Leave empty to show \"Need help?\" in the visitor's language" },
+      { "type": "select", "id": "whatsapp_float_side", "label": "Floating button side", "default": "end", "options": [ { "value": "end", "label": "End (right in LTR, left in RTL)" }, { "value": "start", "label": "Start" } ] },
+      { "type": "header", "content": "Social accounts" },
+      { "type": "text", "id": "social_instagram", "label": "Instagram", "default": "https://www.instagram.com/alrayan_roastery" },
+      { "type": "text", "id": "social_tiktok", "label": "TikTok", "default": "https://www.tiktok.com/@alrayan_roastery.kw" },
+      { "type": "text", "id": "social_facebook", "label": "Facebook", "default": "https://www.facebook.com/share/1GvUVaLAmR/" },
+      { "type": "text", "id": "social_x", "label": "X (Twitter)" },
+      { "type": "text", "id": "social_snapchat", "label": "Snapchat" },
+      { "type": "text", "id": "social_youtube", "label": "YouTube" }
+    ]
+  },
+  {
+    "name": "Search",
+    "settings": [
+      { "type": "checkbox", "id": "predictive_search", "label": "Show live suggestions while typing", "default": true },
+      { "type": "checkbox", "id": "predictive_search_price", "label": "Show prices in suggestions", "default": true }
+    ]
+  }
+]

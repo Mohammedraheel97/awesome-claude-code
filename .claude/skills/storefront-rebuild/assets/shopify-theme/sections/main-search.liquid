@@ -1,0 +1,79 @@
+{%- liquid
+  assign form_id = 'FacetsForm-' | append: section.id
+  assign has_filters = false
+  if section.settings.enable_filtering and search.filters.size > 0
+    assign has_filters = true
+  endif
+  assign sort_by = search.sort_by | default: search.default_sort_by
+  assign terms_enc = search.terms | url_encode
+  assign clear_url = routes.search_url | append: '?q=' | append: terms_enc | append: '&type=product'
+-%}
+<section class="page-hero color-{{ section.settings.banner_scheme }}">
+  <div class="page-width page-hero-inner">
+    <h1>{%- if search.performed -%}{{ 'search.results_for' | t: terms: search.terms }}{%- else -%}{{ 'general.search' | t }}{%- endif -%}</h1>
+    <form class="search-form search-form--page" action="{{ routes.search_url }}" method="get" role="search">
+      <input type="hidden" name="type" value="product">
+      {% render 'icon', name: 'search', size: 20 %}
+      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ 'search.placeholder' | t }}" aria-label="{{ 'general.search' | t }}">
+      <button class="btn" type="submit">{{ 'general.search' | t }}</button>
+    </form>
+  </div>
+</section>
+{%- if search.performed -%}
+  {%- paginate search.results by section.settings.per_page -%}
+    <div class="color-{{ section.settings.color_scheme }}">
+      <div class="page-width shop-layout{% unless has_filters %} shop-layout--full{% endunless %}" style="--cols: {{ section.settings.columns_desktop }}; --cols-m: 2">
+        {%- if has_filters -%}
+          <aside class="shop-side">
+            <h2 class="side-title">{{ 'collections.filters' | t }}</h2>
+            {% render 'facets', results: search, form_id: form_id, open: false %}
+          </aside>
+        {%- endif -%}
+        <div class="shop-main">
+          <div class="toolbar">
+            <p class="result-count">{{ 'search.results_count' | t: count: search.results_count }}</p>
+            {%- if has_filters -%}
+              <label class="sort"><span>{{ 'collections.sort_by' | t }}</span>
+                <select name="sort_by" data-sort form="{{ form_id }}">
+                  {%- for option in search.sort_options -%}<option value="{{ option.value | escape }}"{% if option.value == sort_by %} selected{% endif %}>{{ option.name | escape }}</option>{%- endfor -%}
+                </select>
+              </label>
+            {%- endif -%}
+          </div>
+          {% render 'active-filters', results: search, clear_url: clear_url %}
+          {%- if search.results.size > 0 -%}
+            <div class="grid grid--fixed">
+              {%- for item in search.results -%}
+                {%- case item.object_type -%}
+                  {%- when 'product' -%}
+                    {% render 'product-card', product: item %}
+                  {%- else -%}
+                    <a class="card card--text" href="{{ item.url }}">
+                      <div class="card-body"><span class="eyebrow">{{ item.object_type | capitalize }}</span><span class="card-title">{{ item.title | escape }}</span><span class="muted small">{{ item.content | strip_html | truncatewords: 18 }}</span></div>
+                    </a>
+                {%- endcase -%}
+              {%- endfor -%}
+            </div>
+            {% render 'pagination', paginate: paginate %}
+          {%- else -%}
+            <div class="empty"><p>{{ 'search.no_results' | t: terms: search.terms }}</p><a class="btn" href="{{ routes.all_products_collection_url }}">{{ 'collections.all_products' | t }}</a></div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  {%- endpaginate -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Search results",
+  "class": "section-main-search",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "color_scheme", "id": "banner_scheme", "label": "Banner color scheme", "default": "scheme-4" },
+    { "type": "checkbox", "id": "enable_filtering", "label": "Enable filtering", "default": true },
+    { "type": "range", "id": "per_page", "label": "Results per page", "min": 8, "max": 48, "step": 4, "default": 24 },
+    { "type": "range", "id": "columns_desktop", "label": "Products per row on desktop", "min": 2, "max": 6, "step": 1, "default": 4 }
+  ]
+}
+{% endschema %}

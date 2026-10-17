@@ -1,0 +1,29 @@
+{%- comment -%}
+  Cards are fetched in the browser from /products/<handle>?section_id=product-card-render,
+  using the handles saved to localStorage on each product page visit.
+{%- endcomment -%}
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px" data-recently-viewed data-limit="{{ section.settings.limit }}" data-current="{{ product.handle }}" hidden>
+  <div class="page-width">
+    {% render 'section-heading', heading: section.settings.heading, align: 'start', size: 'small' %}
+    <div class="carousel" data-carousel>
+      <button class="rail-arrow rail-arrow--start" type="button" data-rail="-1" aria-label="{{ 'general.previous' | t }}">{% render 'icon', name: 'chevron', size: 22 %}</button>
+      <div class="rail" data-rail-track data-recent-track></div>
+      <button class="rail-arrow rail-arrow--end" type="button" data-rail="1" aria-label="{{ 'general.next' | t }}">{% render 'icon', name: 'chevron', size: 22 %}</button>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Recently viewed",
+  "class": "section-recent",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "شاهدتها مؤخرًا" },
+    { "type": "range", "id": "limit", "label": "Products to show", "min": 2, "max": 12, "step": 1, "default": 8 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "presets": [ { "name": "Recently viewed" } ]
+}
+{% endschema %}

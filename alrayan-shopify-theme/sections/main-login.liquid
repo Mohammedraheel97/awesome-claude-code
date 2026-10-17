@@ -1,0 +1,38 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: 56px; --pb: 72px">
+  <div class="page-width auth">
+    <div id="login">
+      <h1 class="page-heading">{{ 'customer.login' | t }}</h1>
+      {%- form 'customer_login', class: 'form-stack' -%}
+        {%- if form.errors -%}<p class="form-error">{{ form.errors | default_errors }}</p>{%- endif -%}
+        <label class="field"><span>{{ 'customer.email' | t }}</span><input type="email" name="customer[email]" autocomplete="email" required></label>
+        {%- if form.password_needed -%}
+          <label class="field"><span>{{ 'customer.password' | t }}</span><input type="password" name="customer[password]" autocomplete="current-password" required></label>
+          <a class="link-plain" href="#recover">{{ 'customer.forgot_password' | t }}</a>
+        {%- endif -%}
+        <button class="btn btn--lg btn--block" type="submit">{{ 'customer.sign_in' | t }}</button>
+        <a class="link-plain" href="{{ routes.account_register_url }}">{{ 'customer.create_account' | t }}</a>
+      {%- endform -%}
+    </div>
+    <div id="recover">
+      <h2 class="h-small">{{ 'customer.reset_heading' | t }}</h2>
+      <p class="muted">{{ 'customer.reset_text' | t }}</p>
+      {%- form 'recover_customer_password', class: 'form-stack' -%}
+        {%- if form.posted_successfully? -%}<p class="form-success">{{ 'customer.reset_sent' | t }}</p>{%- endif -%}
+        {%- if form.errors -%}<p class="form-error">{{ form.errors | default_errors }}</p>{%- endif -%}
+        <label class="field"><span>{{ 'customer.email' | t }}</span><input type="email" name="email" autocomplete="email" required></label>
+        <button class="btn btn--outline btn--block" type="submit">{{ 'customer.submit' | t }}</button>
+        <a class="link-plain" href="#login">{{ 'general.cancel' | t }}</a>
+      {%- endform -%}
+    </div>
+    {%- if shop.checkout.guest_login -%}
+      <div>
+        <h2 class="h-small">{{ 'customer.guest' | t }}</h2>
+        {%- form 'guest_login' -%}<button class="btn btn--outline btn--block" type="submit">{{ 'customer.continue_guest' | t }}</button>{%- endform -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Login", "settings": [ { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" } ] }
+{% endschema %}

@@ -1,0 +1,52 @@
+<article class="section color-{{ section.settings.color_scheme }}" style="--pt: 40px; --pb: 64px">
+  <div class="page-width narrow" style="--max: 78ch">
+    <nav class="crumbs crumbs--dark" aria-label="{{ 'general.breadcrumbs' | t }}"><a href="{{ routes.root_url }}">{{ 'general.home' | t }}</a><span aria-hidden="true">/</span><a href="{{ blog.url }}">{{ blog.title | escape }}</a></nav>
+    <h1 class="page-heading">{{ article.title | escape }}</h1>
+    <p class="muted">{{ article.published_at | time_tag: format: 'date' }}{% if section.settings.show_author %} · {{ 'blogs.by' | t: author: article.author }}{% endif %}</p>
+    {%- if article.image and section.settings.show_image -%}
+      <div class="article-hero">{{ article.image | image_url: width: 1600 | image_tag: widths: '600,900,1200,1600', sizes: '(min-width: 990px) 800px, 100vw', alt: article.image.alt | default: article.title }}</div>
+    {%- endif -%}
+    <div class="rte">{{ article.content }}</div>
+    {%- if article.tags.size > 0 -%}
+      <div class="chips">{%- for tag in article.tags -%}<a class="chip" href="{{ blog.url }}/tagged/{{ tag | handleize }}">{{ tag | escape }}</a>{%- endfor -%}</div>
+    {%- endif -%}
+    <a class="link-more" href="{{ blog.url }}">{{ 'blogs.back' | t }}</a>
+
+    {%- if blog.comments_enabled? -%}
+      <section class="comments">
+        {%- if article.comments_count > 0 -%}
+          <h2 class="h-small">{{ 'blogs.comments' | t: count: article.comments_count }}</h2>
+          {%- paginate article.comments by 20 -%}
+            {%- for comment in article.comments -%}
+              <div class="comment"><div class="rte">{{ comment.content }}</div><small class="muted">{{ comment.author }} · {{ comment.created_at | time_tag: format: 'date' }}</small></div>
+            {%- endfor -%}
+            {% render 'pagination', paginate: paginate %}
+          {%- endpaginate -%}
+        {%- endif -%}
+        {%- form 'new_comment', article, class: 'form-grid' -%}
+          <h2 class="h-small field--full">{{ 'blogs.leave_comment' | t }}</h2>
+          {%- if form.posted_successfully? -%}
+            <p class="form-success field--full">{%- if blog.moderated? -%}{{ 'blogs.comment_moderated' | t }}{%- else -%}{{ 'blogs.comment_posted' | t }}{%- endif -%}</p>
+          {%- endif -%}
+          {%- if form.errors -%}<p class="form-error field--full">{{ form.errors | default_errors }}</p>{%- endif -%}
+          <label class="field"><span>{{ 'contact.name' | t }}</span><input type="text" name="comment[author]" required value="{{ form.author }}"></label>
+          <label class="field"><span>{{ 'contact.email' | t }}</span><input type="email" name="comment[email]" required value="{{ form.email }}"></label>
+          <label class="field field--full"><span>{{ 'contact.message' | t }}</span><textarea name="comment[body]" rows="5" required>{{ form.body }}</textarea></label>
+          <button class="btn" type="submit">{{ 'blogs.post_comment' | t }}</button>
+        {%- endform -%}
+      </section>
+    {%- endif -%}
+  </div>
+</article>
+
+{% schema %}
+{
+  "name": "Blog post",
+  "class": "section-main-article",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "show_image", "label": "Show featured image", "default": true },
+    { "type": "checkbox", "id": "show_author", "label": "Show author", "default": true }
+  ]
+}
+{% endschema %}

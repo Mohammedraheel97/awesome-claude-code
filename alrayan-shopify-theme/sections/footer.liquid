@@ -1,0 +1,100 @@
+<footer class="site-footer color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px">
+  <div class="page-width footer-grid" style="--footer-cols: {{ section.blocks.size | at_least: 1 }}">
+    {%- for block in section.blocks -%}
+      <div class="footer-block footer-block--{{ block.type }}" {{ block.shopify_attributes }}>
+        {%- case block.type -%}
+          {%- when 'brand' -%}
+            {%- assign logo = block.settings.logo | default: settings.logo -%}
+            {%- if logo != blank -%}
+              {%- assign logo_style = 'width: ' | append: block.settings.logo_width | append: 'px' -%}
+              {{ logo | image_url: width: 240 | image_tag: class: 'footer-logo', style: logo_style, loading: 'lazy', alt: shop.name }}
+            {%- endif -%}
+            {%- if block.settings.text != blank -%}<div class="rte">{{ block.settings.text }}</div>{%- endif -%}
+            {%- if block.settings.show_social -%}{% render 'social-icons', class: 'footer-social' %}{%- endif -%}
+          {%- when 'menu' -%}
+            {%- if block.settings.heading != blank -%}<h3>{{ block.settings.heading | escape }}</h3>{%- endif -%}
+            {%- if block.settings.menu != blank -%}
+              <ul class="footer-links" role="list">
+                {%- for link in block.settings.menu.links -%}<li><a href="{{ link.url }}">{{ link.title | escape }}</a></li>{%- endfor -%}
+              </ul>
+            {%- endif -%}
+          {%- when 'text' -%}
+            {%- if block.settings.heading != blank -%}<h3>{{ block.settings.heading | escape }}</h3>{%- endif -%}
+            <div class="rte">{{ block.settings.text }}</div>
+          {%- when 'newsletter' -%}
+            {%- if block.settings.heading != blank -%}<h3>{{ block.settings.heading | escape }}</h3>{%- endif -%}
+            {%- if block.settings.text != blank -%}<div class="rte">{{ block.settings.text }}</div>{%- endif -%}
+            {%- form 'customer', class: 'newsletter-form', id: 'FooterNewsletter' -%}
+              <input type="hidden" name="contact[tags]" value="newsletter">
+              <div class="input-row">
+                <label class="visually-hidden" for="FooterNewsletterEmail">{{ 'newsletter.email' | t }}</label>
+                <input id="FooterNewsletterEmail" type="email" name="contact[email]" required autocomplete="email" placeholder="{{ 'newsletter.email' | t }}">
+                <button class="btn" type="submit">{{ 'newsletter.subscribe' | t }}</button>
+              </div>
+              {%- if form.posted_successfully? -%}<p class="form-success">{{ 'newsletter.success' | t }}</p>{%- endif -%}
+              {%- if form.errors -%}<p class="form-error">{{ form.errors | default_errors }}</p>{%- endif -%}
+            {%- endform -%}
+        {%- endcase -%}
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <div class="footer-bottom">
+    <div class="page-width footer-bottom-inner">
+      <p class="copyright">&copy; {{ 'now' | date: '%Y' }} {{ section.settings.copyright | default: shop.name | escape }}{% if section.settings.show_powered_by %} · {{ powered_by_link }}{% endif %}</p>
+      {%- if section.settings.show_payment_icons -%}
+        <ul class="payment-icons" role="list">
+          {%- for type in shop.enabled_payment_types -%}<li>{{ type | payment_type_svg_tag: class: 'payment-icon' }}</li>{%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "class": "section-footer",
+  "enabled_on": { "groups": ["footer"] },
+  "max_blocks": 6,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-4" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 16, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "text", "id": "copyright", "label": "Copyright text", "info": "Shown after © and the year. Leave empty to use the store name." },
+    { "type": "checkbox", "id": "show_payment_icons", "label": "Show payment icons", "default": true },
+    { "type": "checkbox", "id": "show_powered_by", "label": "Show \"Powered by Shopify\"", "default": false }
+  ],
+  "blocks": [
+    {
+      "type": "brand", "name": "Brand", "limit": 1,
+      "settings": [
+        { "type": "image_picker", "id": "logo", "label": "Logo", "info": "Leave empty to use the logo from theme settings" },
+        { "type": "range", "id": "logo_width", "label": "Logo width", "min": 40, "max": 200, "step": 4, "unit": "px", "default": 80 },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>أجود القهوة المحمصة والمكسرات والبهارات والمربيات والمخللات والفواكه المجففة — كل ما يلزمك متوفر لدى الريان.</p>" },
+        { "type": "checkbox", "id": "show_social", "label": "Show social icons", "default": true }
+      ]
+    },
+    {
+      "type": "menu", "name": "Menu",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "تسوق" },
+        { "type": "link_list", "id": "menu", "label": "Menu", "default": "footer" }
+      ]
+    },
+    {
+      "type": "text", "name": "Text",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "زورونا" },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>حولي، قطعة 1، شارع موسى بن نصير</p><p>يوميًا 10:30 صباحًا – 12:00 منتصف الليل</p>" }
+      ]
+    },
+    {
+      "type": "newsletter", "name": "Newsletter", "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "النشرة البريدية" },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>اشترك ليصلك جديد المنتجات والعروض.</p>" }
+      ]
+    }
+  ]
+}
+{% endschema %}

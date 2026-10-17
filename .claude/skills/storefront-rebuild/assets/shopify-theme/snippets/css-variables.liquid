@@ -1,0 +1,85 @@
+{%- comment -%}
+  Fonts and design tokens from theme settings, plus one CSS class per colour scheme.
+  Accepts: dir {String} - 'rtl' puts the Arabic fonts first in every stack.
+{%- endcomment -%}
+{%- liquid
+  assign heading_font = settings.type_heading_font
+  assign body_font = settings.type_body_font
+  assign body_bold = body_font | font_modify: 'weight', 'bold'
+  assign ar_h = ''
+  assign ar_b = ''
+  if settings.arabic_heading_font != 'none'
+    assign ar_h = '"' | append: settings.arabic_heading_font | append: '", '
+  endif
+  if settings.arabic_body_font != 'none'
+    assign ar_b = '"' | append: settings.arabic_body_font | append: '", '
+  endif
+  assign gfonts = ''
+  if settings.arabic_heading_font != 'none'
+    assign gfonts = 'family=' | append: settings.arabic_heading_font | append: ':wght@400;700'
+  endif
+  if settings.arabic_body_font != 'none' and settings.arabic_body_font != settings.arabic_heading_font
+    if gfonts != ''
+      assign gfonts = gfonts | append: '&'
+    endif
+    assign gfonts = gfonts | append: 'family=' | append: settings.arabic_body_font | append: ':wght@400;700'
+  endif
+  assign gfonts = gfonts | replace: ' ', '+'
+-%}
+{%- if gfonts != '' -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?{{ gfonts }}&display=swap">
+{%- endif -%}
+<link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+{%- style -%}
+  {{ heading_font | font_face: font_display: 'swap' }}
+  {{ body_font | font_face: font_display: 'swap' }}
+  {%- if body_bold -%}{{ body_bold | font_face: font_display: 'swap' }}{%- endif -%}
+
+  :root {
+    {%- if dir == 'rtl' %}
+    --font-heading: {{ ar_h }}{{ heading_font.family }}, {{ heading_font.fallback_families }};
+    --font-body: {{ ar_b }}{{ body_font.family }}, {{ body_font.fallback_families }};
+    {%- else %}
+    --font-heading: {{ heading_font.family }}, {{ ar_h }}{{ heading_font.fallback_families }};
+    --font-body: {{ body_font.family }}, {{ ar_b }}{{ body_font.fallback_families }};
+    {%- endif %}
+    --font-heading-weight: {% if dir == 'rtl' and settings.arabic_heading_font != 'none' %}700{% else %}{{ heading_font.weight }}{% endif %};
+    --font-heading-style: {{ heading_font.style }};
+    --font-body-weight: {{ body_font.weight }};
+    --heading-scale: {{ settings.heading_scale | divided_by: 100.0 }};
+    --body-scale: {{ settings.body_scale | divided_by: 100.0 }};
+    --page-width: {{ settings.page_width }}px;
+    --section-spacing: {{ settings.section_spacing }}px;
+    --radius-btn: {{ settings.button_radius }}px;
+    --radius-card: {{ settings.card_radius }}px;
+    --radius-image: {{ settings.image_radius }}px;
+    --card-shadow: {% if settings.card_shadow %}0 1px 2px rgb(0 0 0 / .05), 0 4px 14px rgb(0 0 0 / .05){% else %}none{% endif %};
+    --card-shadow-hover: {% if settings.card_shadow %}0 12px 30px rgb(0 0 0 / .12){% else %}none{% endif %};
+    --card-image-padding: {{ settings.card_image_padding }}px;
+    --card-image-fit: {{ settings.card_image_fit }};
+    --card-title-lines: {{ settings.card_title_lines }};
+    --badge-sale: {{ settings.badge_sale_bg }};
+    --badge-new: {{ settings.badge_new_bg }};
+    --badge-soldout: {{ settings.badge_soldout_bg }};
+    --whatsapp: {{ settings.whatsapp_color }};
+    --logo-width: {{ settings.logo_width }}px;
+  }
+
+  {% for scheme in settings.color_schemes -%}
+  .color-{{ scheme.id }} {
+    --bg: {{ scheme.settings.background }};
+    --surface: {{ scheme.settings.surface }};
+    --surface-fg: {{ scheme.settings.surface_text }};
+    --surface-accent: {{ scheme.settings.surface_accent }};
+    --fg: {{ scheme.settings.text }};
+    --accent: {{ scheme.settings.accent }};
+    --accent-hover: {{ scheme.settings.accent_hover }};
+    --on-accent: {{ scheme.settings.on_accent }};
+    --border: {{ scheme.settings.border }};
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+  {% endfor %}
+{%- endstyle -%}

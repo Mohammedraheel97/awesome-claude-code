@@ -1,0 +1,28 @@
+{%- comment -%}
+  Product price. Accepts: product {Product}, variant {Variant} (optional - shows that variant's price), large {Boolean}
+{%- endcomment -%}
+{%- liquid
+  assign target = variant | default: product.selected_or_first_available_variant
+  assign price = target.price
+  assign compare = target.compare_at_price
+  assign show_from = false
+  if variant == blank and product.price_varies
+    assign show_from = true
+    assign price = product.price_min
+    assign compare = nil
+  endif
+-%}
+<div class="price{% if large %} price--large{% endif %}" data-price>
+  {%- if show_from -%}<small>{{ 'products.from' | t }}</small>{%- endif -%}
+  <span class="price-now">{{ price | money }}</span>
+  {%- if compare > price -%}
+    <s class="price-was"><span class="visually-hidden">{{ 'products.regular_price' | t }}</span>{{ compare | money }}</s>
+    {%- if large -%}
+      {%- assign saving = compare | minus: price | money -%}
+      <span class="badge badge--sale">{{ 'products.save' | t: amount: saving }}</span>
+    {%- endif -%}
+  {%- endif -%}
+  {%- if target.unit_price_measurement -%}
+    <small class="unit-price">{{ target.unit_price | money }}/{{ target.unit_price_measurement.reference_unit }}</small>
+  {%- endif -%}
+</div>

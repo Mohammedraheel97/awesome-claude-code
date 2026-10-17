@@ -1,0 +1,56 @@
+{%- liquid
+  assign c = section.settings.collection
+  assign limit = section.settings.products_to_show
+  assign link_url = section.settings.link_url | default: c.url
+-%}
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px; --cols: {{ section.settings.columns_desktop }}; --cols-m: {{ section.settings.columns_mobile }}">
+  <div class="page-width">
+    {% render 'section-heading', eyebrow: section.settings.eyebrow, heading: section.settings.heading, align: section.settings.align, size: section.settings.heading_size, link_label: section.settings.link_label, link_url: link_url %}
+    {%- capture cards -%}
+      {%- if c != blank and c.products_count > 0 -%}
+        {%- for product in c.products limit: limit -%}{% render 'product-card', product: product %}{%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <article class="card card--{{ settings.card_image_ratio }}"><span class="card-media">{{ 'product-' | append: i | placeholder_svg_tag: 'placeholder card-img' }}</span><div class="card-body"><span class="card-title">{{ 'products.example_title' | t }}</span><div class="price"><span class="price-now">{{ 1750 | money }}</span></div></div></article>
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endcapture -%}
+    {%- if section.settings.layout == 'carousel' -%}
+      <div class="carousel" data-carousel>
+        <button class="rail-arrow rail-arrow--start" type="button" data-rail="-1" aria-label="{{ 'general.previous' | t }}">{% render 'icon', name: 'chevron', size: 22 %}</button>
+        <div class="rail" data-rail-track>{{ cards }}</div>
+        <button class="rail-arrow rail-arrow--end" type="button" data-rail="1" aria-label="{{ 'general.next' | t }}">{% render 'icon', name: 'chevron', size: 22 %}</button>
+      </div>
+    {%- else -%}
+      <div class="grid grid--fixed">{{ cards }}</div>
+    {%- endif -%}
+    {%- if section.settings.button_label != blank and link_url != blank -%}
+      <div class="center-row"><a class="btn btn--outline" href="{{ link_url }}">{{ section.settings.button_label | escape }}</a></div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured collection",
+  "class": "section-featured",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "وصل حديثًا" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "جديدنا" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "default": "medium", "options": [ { "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" } ] },
+    { "type": "select", "id": "align", "label": "Heading alignment", "default": "start", "options": [ { "value": "start", "label": "Start" }, { "value": "center", "label": "Center" } ] },
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "range", "id": "products_to_show", "label": "Products to show", "min": 2, "max": 24, "step": 1, "default": 12 },
+    { "type": "select", "id": "layout", "label": "Layout", "default": "carousel", "options": [ { "value": "carousel", "label": "Carousel" }, { "value": "grid", "label": "Grid" } ] },
+    { "type": "range", "id": "columns_desktop", "label": "Products per row on desktop", "min": 2, "max": 6, "step": 1, "default": 5 },
+    { "type": "select", "id": "columns_mobile", "label": "Products per row on mobile (grid)", "default": "2", "options": [ { "value": "1", "label": "1" }, { "value": "2", "label": "2" } ] },
+    { "type": "text", "id": "link_label", "label": "Top link label", "default": "عرض الكل" },
+    { "type": "url", "id": "link_url", "label": "Top link", "info": "Defaults to the collection" },
+    { "type": "text", "id": "button_label", "label": "Bottom button label" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 }
+  ],
+  "presets": [ { "name": "Featured collection" } ]
+}
+{% endschema %}

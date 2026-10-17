@@ -1,0 +1,48 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "brand": {
+          "type": "brand",
+          "settings": {
+            "show_social": true
+          }
+        },
+        "menu": {
+          "type": "menu",
+          "settings": {
+            "heading": "تسوق",
+            "menu": "footer"
+          }
+        },
+        "visit": {
+          "type": "text",
+          "settings": {
+            "heading": "زورونا",
+            "text": "<p>حولي، قطعة 1، شارع موسى بن نصير، مقابل مسجد المطيري</p><p>يوميًا 10:30 صباحًا – 12:00 منتصف الليل<br>الجمعة: من 1:30 ظهرًا</p><p><a href=\"tel:+96592286230\">+965 9228 6230</a></p>"
+          }
+        },
+        "newsletter": {
+          "type": "newsletter",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "brand",
+        "menu",
+        "visit",
+        "newsletter"
+      ],
+      "settings": {
+        "color_scheme": "scheme-4",
+        "show_payment_icons": true
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

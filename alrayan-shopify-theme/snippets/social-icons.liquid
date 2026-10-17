@@ -1,0 +1,16 @@
+{%- comment -%} Links to the social accounts set in theme settings. Accepts: class {String} {%- endcomment -%}
+{%- liquid
+  assign links = 'instagram,tiktok,facebook,x,snapchat,youtube' | split: ','
+-%}
+<ul class="social-icons {{ class }}" role="list">
+  {%- for name in links -%}
+    {%- assign key = 'social_' | append: name -%}
+    {%- assign url = settings[key] -%}
+    {%- if url != blank -%}
+      <li><a href="{{ url }}" target="_blank" rel="noopener" aria-label="{{ name | capitalize }}">{% render 'icon', name: name, size: 20 %}</a></li>
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if settings.whatsapp_number != blank -%}
+    <li><a href="https://wa.me/{{ settings.whatsapp_number | remove: '+' | remove: ' ' }}" target="_blank" rel="noopener" aria-label="WhatsApp">{% render 'icon', name: 'whatsapp', size: 20 %}</a></li>
+  {%- endif -%}
+</ul>

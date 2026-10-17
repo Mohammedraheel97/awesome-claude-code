@@ -1,0 +1,42 @@
+<script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: 48px; --pb: 72px">
+  <div class="page-width account">
+    <a class="link-plain" href="{{ routes.account_url }}">{{ 'customer.back_to_account' | t }}</a>
+    <h1 class="page-heading">{{ 'customer.addresses' | t }}</h1>
+
+    <details class="acc account-card">
+      <summary>{{ 'customer.add_address' | t }}</summary>
+      {%- form 'customer_address', customer.new_address -%}
+        {% render 'address-form', form: form, key: 'new' %}
+        <div class="btn-row"><button class="btn" type="submit">{{ 'customer.save' | t }}</button></div>
+      {%- endform -%}
+    </details>
+
+    {%- paginate customer.addresses by 10 -%}
+      <div class="address-grid">
+        {%- for address in customer.addresses -%}
+          <div class="account-card">
+            {%- if address == customer.default_address -%}<span class="badge badge--new">{{ 'customer.default' | t }}</span>{%- endif -%}
+            {{ address | format_address }}
+            <details class="acc">
+              <summary>{{ 'customer.edit' | t }}</summary>
+              {%- form 'customer_address', address -%}
+                {% render 'address-form', form: form, key: address.id %}
+                <div class="btn-row"><button class="btn" type="submit">{{ 'customer.save' | t }}</button></div>
+              {%- endform -%}
+            </details>
+            <form method="post" action="{{ address.url }}" data-confirm="{{ 'customer.delete_confirm' | t }}">
+              <input type="hidden" name="_method" value="delete">
+              <button class="link-remove" type="submit">{{ 'customer.delete' | t }}</button>
+            </form>
+          </div>
+        {%- endfor -%}
+      </div>
+      {% render 'pagination', paginate: paginate %}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Addresses", "settings": [ { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" } ] }
+{% endschema %}

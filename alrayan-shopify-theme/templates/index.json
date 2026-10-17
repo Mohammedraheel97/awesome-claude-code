@@ -1,0 +1,101 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-slideshow",
+      "blocks": {
+        "slide-1": { "type": "slide", "settings": { "eyebrow": "المونة البيتية", "heading": "من الشجر إلى الحجر", "text": "<p>زيت الزيتون والزيتون الفاخر، والمربيات والمخللات الطبيعية 100%</p>", "button_label": "تسوق المونة", "button2_label": "جميع الأقسام", "align": "start", "overlay": 55 } },
+        "slide-2": { "type": "slide", "settings": { "eyebrow": "مكسرات طازجة", "heading": "مكسرات فاخرة بنكهات الريان", "text": "<p>أجود أنواع المكسرات النية والمحمصة، وخلطات مميزة لكل المناسبات</p>", "button_label": "تسوق المكسرات", "button2_label": "جميع الأقسام", "align": "start", "overlay": 55 } },
+        "slide-3": { "type": "slide", "settings": { "eyebrow": "من محمصتنا", "heading": "كاجو بنكهات لا تُقاوم", "text": "<p>كاجو محمّص بنكهات الجبنة والترافل والمدخن والباربيكيو وأكثر</p>", "button_label": "تسوق الكاجو", "button2_label": "جميع الأقسام", "align": "start", "overlay": 55 } }
+      },
+      "block_order": ["slide-1", "slide-2", "slide-3"],
+      "settings": { "color_scheme": "scheme-4", "height": "large", "autoplay": true, "speed": 6, "ken_burns": true, "show_arrows": true, "show_dots": true, "label": "Highlights" }
+    },
+    "circles": {
+      "type": "collection-circles",
+      "blocks": {
+        "c1": { "type": "collection", "settings": {} }, "c2": { "type": "collection", "settings": {} }, "c3": { "type": "collection", "settings": {} },
+        "c4": { "type": "collection", "settings": {} }, "c5": { "type": "collection", "settings": {} }, "c6": { "type": "collection", "settings": {} },
+        "c7": { "type": "collection", "settings": {} }, "c8": { "type": "collection", "settings": {} }
+      },
+      "block_order": ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"],
+      "settings": { "color_scheme": "scheme-1", "eyebrow": "تشكيلة واسعة", "heading": "تسوق حسب القسم", "link_label": "جميع الأقسام", "link_url": "/collections", "size": "medium" }
+    },
+    "usp": {
+      "type": "icon-features",
+      "blocks": {
+        "f1": { "type": "feature", "settings": { "icon": "leaf", "title": "محمصة ومطحنة", "text": "قهوة ومكسرات محمصة طازجة" } },
+        "f2": { "type": "feature", "settings": { "icon": "check", "title": "طبيعي 100%", "text": "مربيات ومخللات بلا إضافات" } },
+        "f3": { "type": "feature", "settings": { "icon": "truck", "title": "توصيل أو استلام", "text": "في جميع مناطق الكويت" } },
+        "f4": { "type": "feature", "settings": { "icon": "card", "title": "دفع آمن", "text": "كي نت، فيزا وماستر" } }
+      },
+      "block_order": ["f1", "f2", "f3", "f4"],
+      "settings": { "color_scheme": "scheme-2", "columns": 4 }
+    },
+    "new_arrivals": {
+      "type": "featured-collection",
+      "settings": { "color_scheme": "scheme-1", "eyebrow": "وصل حديثًا", "heading": "جديدنا", "products_to_show": 12, "layout": "carousel", "columns_desktop": 5, "link_label": "عرض الكل" }
+    },
+    "promos": {
+      "type": "promo-banners",
+      "blocks": {
+        "b1": { "type": "banner", "settings": { "eyebrow": "تشكيلة جديدة", "heading": "دراجيه الفواكه والشوكولاتة", "button_label": "تسوق الآن" } },
+        "b2": { "type": "banner", "settings": { "eyebrow": "من مطحنتنا", "heading": "بهارات وأعشاب مطحونة بعناية", "button_label": "تسوق الآن" } }
+      },
+      "block_order": ["b1", "b2"],
+      "settings": { "color_scheme": "scheme-1", "max_columns": 2, "height": "medium" }
+    },
+    "explore": {
+      "type": "collection-tabs",
+      "blocks": { "t1": { "type": "tab", "settings": {} }, "t2": { "type": "tab", "settings": {} }, "t3": { "type": "tab", "settings": {} }, "t4": { "type": "tab", "settings": {} } },
+      "block_order": ["t1", "t2", "t3", "t4"],
+      "settings": { "color_scheme": "scheme-1", "eyebrow": "من منتجاتنا", "heading": "اكتشف تشكيلة الريان", "products_to_show": 8, "columns_desktop": 4 }
+    },
+    "coffee": {
+      "type": "image-with-text",
+      "blocks": {
+        "e": { "type": "eyebrow", "settings": { "text": "من محمصتنا" } },
+        "h": { "type": "heading", "settings": { "heading": "قهوة محمصة طازجة بنكهة أصيلة", "size": "large" } },
+        "t": { "type": "text", "settings": { "text": "<p>قهوة عربية وتركية بأوزان تناسبك، مع خيار الهيل — اختيارك الأول لأجود أنواع القهوة المحمصة.</p>" } },
+        "b": { "type": "buttons", "settings": { "label": "تسوق القهوة", "style": "solid", "label2": "المشروبات الساخنة" } }
+      },
+      "block_order": ["e", "h", "t", "b"],
+      "settings": { "color_scheme": "scheme-3", "layout": "image-first", "image_width": "half", "ratio": "landscape" }
+    },
+    "offers": {
+      "type": "featured-collection",
+      "settings": { "color_scheme": "scheme-1", "eyebrow": "لفترة محدودة", "heading": "العروض والخصومات", "products_to_show": 12, "layout": "carousel", "columns_desktop": 5, "link_label": "عرض الكل" }
+    },
+    "values": {
+      "type": "values-grid",
+      "blocks": {
+        "v1": { "type": "column", "settings": { "title": "تحميص وطحن يومي", "text": "<p>نحمّص القهوة والمكسرات ونطحن البهارات في محلنا لتصلك بأفضل نكهة.</p>" } },
+        "v2": { "type": "column", "settings": { "title": "نكهات الريان الفريدة", "text": "<p>مكسرات بنكهات مميزة: مدخن، حامض، جبنة، ترافل، باربيكيو وأكثر.</p>" } },
+        "v3": { "type": "column", "settings": { "title": "من الشجر إلى الحجر", "text": "<p>زيت زيتون وزيتون فاخر، ومربيات ومخللات طبيعية 100%.</p>" } },
+        "v4": { "type": "column", "settings": { "title": "كل ما يلزمك في مكان واحد", "text": "<p>فواكه مجففة، حبوب وبقوليات، حلويات ومتة — أكثر من 200 منتج.</p>" } }
+      },
+      "block_order": ["v1", "v2", "v3", "v4"],
+      "settings": { "color_scheme": "scheme-5", "eyebrow": "لماذا الريان", "heading": "جودة تستحق ثقتك", "columns": 4 }
+    },
+    "store": {
+      "type": "store-info",
+      "blocks": {
+        "d1": { "type": "detail", "settings": { "icon": "pin", "label": "العنوان", "value": "حولي، قطعة 1، شارع موسى بن نصير، مقابل مسجد المطيري" } },
+        "d2": { "type": "detail", "settings": { "icon": "clock", "label": "ساعات العمل", "value": "يوميًا 10:30 صباحًا – 12:00 منتصف الليل · الجمعة من 1:30 ظهرًا" } },
+        "d3": { "type": "detail", "settings": { "icon": "phone", "label": "اتصل بنا", "value": "<a href=\"tel:+96592286230\">+965 9228 6230</a> · <a href=\"tel:+96592286229\">+965 9228 6229</a>" } }
+      },
+      "block_order": ["d1", "d2", "d3"],
+      "settings": { "color_scheme": "scheme-1", "map_query": "29.3755821,47.9773173" }
+    },
+    "social": {
+      "type": "social-band",
+      "blocks": {
+        "s1": { "type": "link", "settings": { "platform": "instagram", "url": "https://www.instagram.com/alrayan_roastery", "handle": "@alrayan_roastery" } },
+        "s2": { "type": "link", "settings": { "platform": "tiktok", "url": "https://www.tiktok.com/@alrayan_roastery.kw", "handle": "@alrayan_roastery.kw" } },
+        "s3": { "type": "link", "settings": { "platform": "facebook", "url": "https://www.facebook.com/share/1GvUVaLAmR/", "handle": "Alrayan" } }
+      },
+      "block_order": ["s1", "s2", "s3"],
+      "settings": { "color_scheme": "scheme-4" }
+    }
+  },
+  "order": ["hero", "circles", "usp", "new_arrivals", "promos", "explore", "coffee", "offers", "values", "store", "social"]
+}

@@ -1,0 +1,48 @@
+{%- comment -%}
+  Storefront filters (Shopify Search & Discovery) as a GET form. JS submits it on change.
+  Accepts: results {Collection|Search}, form_id {String}, open {Boolean}
+{%- endcomment -%}
+<form id="{{ form_id }}" class="facets" data-facets-form>
+  {%- if results.terms -%}
+    <input type="hidden" name="q" value="{{ results.terms | escape }}">
+    <input type="hidden" name="type" value="product">
+  {%- endif -%}
+  {%- for filter in results.filters -%}
+    <details class="facet"{% if open or filter.active_values.size > 0 or filter.min_value.value or filter.max_value.value %} open{% endif %}>
+      <summary>{{ filter.label | escape }} {% render 'icon', name: 'chevron-down', size: 16 %}</summary>
+      <div class="facet-body">
+        {%- case filter.type -%}
+          {%- when 'price_range' -%}
+            {%- assign max_money = filter.range_max | money_without_currency | remove: ',' -%}
+            <div class="price-range">
+              <label><span>{{ 'collections.price_from' | t }}</span>
+                <input type="number" inputmode="decimal" name="{{ filter.min_value.param_name }}" min="0" max="{{ max_money }}" step="any" placeholder="0"{% if filter.min_value.value %} value="{{ filter.min_value.value | money_without_currency | remove: ',' }}"{% endif %}>
+              </label>
+              <label><span>{{ 'collections.price_to' | t }}</span>
+                <input type="number" inputmode="decimal" name="{{ filter.max_value.param_name }}" min="0" max="{{ max_money }}" step="any" placeholder="{{ max_money }}"{% if filter.max_value.value %} value="{{ filter.max_value.value | money_without_currency | remove: ',' }}"{% endif %}>
+              </label>
+            </div>
+          {%- else -%}
+            <ul role="list">
+              {%- for value in filter.values -%}
+                {%- liquid
+                  assign disabled = false
+                  if value.count == 0 and value.active == false
+                    assign disabled = true
+                  endif
+                -%}
+                <li>
+                  <label class="facet-check{% if disabled %} is-disabled{% endif %}">
+                    <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}"{% if value.active %} checked{% endif %}{% if disabled %} disabled{% endif %}>
+                    <span>{{ value.label | escape }}</span>
+                    <small>{{ value.count }}</small>
+                  </label>
+                </li>
+              {%- endfor -%}
+            </ul>
+        {%- endcase -%}
+      </div>
+    </details>
+  {%- endfor -%}
+  <noscript><button class="btn btn--block" type="submit">{{ 'collections.apply' | t }}</button></noscript>
+</form>

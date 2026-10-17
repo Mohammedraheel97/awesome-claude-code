@@ -1,0 +1,64 @@
+<section class="section usp color-{{ section.settings.color_scheme }}{% if section.settings.border %} usp--bordered{% endif %}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px; --cols: {{ section.settings.columns }}">
+  <ul class="page-width usp-grid usp--{{ section.settings.layout }}" role="list">
+    {%- for block in section.blocks -%}
+      <li {{ block.shopify_attributes }}>
+        <span class="usp-icon">
+          {%- if block.settings.image != blank -%}
+            {{ block.settings.image | image_url: width: 96 | image_tag: loading: 'lazy', alt: '' }}
+          {%- else -%}
+            {% render 'icon', name: block.settings.icon, size: 24 %}
+          {%- endif -%}
+        </span>
+        <div>
+          {%- if block.settings.title != blank -%}<strong>{{ block.settings.title | escape }}</strong>{%- endif -%}
+          {%- if block.settings.text != blank -%}<span>{{ block.settings.text | escape }}</span>{%- endif -%}
+        </div>
+      </li>
+    {%- endfor -%}
+  </ul>
+</section>
+
+{% schema %}
+{
+  "name": "Icon features",
+  "class": "section-usp",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-2" },
+    { "type": "range", "id": "columns", "label": "Columns on desktop", "min": 2, "max": 6, "step": 1, "default": 4 },
+    { "type": "select", "id": "layout", "label": "Icon position", "default": "side", "options": [ { "value": "side", "label": "Beside the text" }, { "value": "top", "label": "Above the text" } ] },
+    { "type": "checkbox", "id": "border", "label": "Top & bottom border", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 }
+  ],
+  "blocks": [
+    {
+      "type": "feature", "name": "Feature",
+      "settings": [
+        {
+          "type": "select", "id": "icon", "label": "Icon", "default": "leaf",
+          "options": [
+            { "value": "leaf", "label": "Leaf" }, { "value": "check", "label": "Check" }, { "value": "truck", "label": "Delivery truck" }, { "value": "card", "label": "Card" },
+            { "value": "shield", "label": "Shield" }, { "value": "coffee", "label": "Coffee" }, { "value": "gift", "label": "Gift" }, { "value": "star", "label": "Star" },
+            { "value": "phone", "label": "Phone" }, { "value": "pin", "label": "Location" }, { "value": "clock", "label": "Clock" }, { "value": "whatsapp", "label": "WhatsApp" }
+          ]
+        },
+        { "type": "image_picker", "id": "image", "label": "Custom icon image", "info": "Replaces the icon" },
+        { "type": "text", "id": "title", "label": "Title", "default": "محمصة ومطحنة" },
+        { "type": "text", "id": "text", "label": "Text", "default": "قهوة ومكسرات محمصة طازجة" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Icon features",
+      "blocks": [
+        { "type": "feature", "settings": { "icon": "leaf", "title": "محمصة ومطحنة", "text": "قهوة ومكسرات محمصة طازجة" } },
+        { "type": "feature", "settings": { "icon": "check", "title": "طبيعي 100%", "text": "مربيات ومخللات بلا إضافات" } },
+        { "type": "feature", "settings": { "icon": "truck", "title": "توصيل أو استلام", "text": "في جميع مناطق الكويت" } },
+        { "type": "feature", "settings": { "icon": "card", "title": "دفع آمن", "text": "كي نت، فيزا وماستر" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

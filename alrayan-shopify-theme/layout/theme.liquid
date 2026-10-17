@@ -1,0 +1,89 @@
+<!doctype html>
+{%- liquid
+  assign lang2 = request.locale.iso_code | slice: 0, 2
+  assign dir = 'ltr'
+  if settings.text_direction == 'rtl'
+    assign dir = 'rtl'
+  elsif settings.text_direction == 'auto'
+    case lang2
+      when 'ar', 'he', 'fa', 'ur'
+        assign dir = 'rtl'
+    endcase
+  endif
+  assign first_scheme = settings.color_schemes | first
+-%}
+<html class="no-js" lang="{{ request.locale.iso_code }}" dir="{{ dir }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="{{ first_scheme.settings.accent }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; {{ current_tags | join: ', ' }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.page' | t: page: current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {% render 'meta-tags' %}
+    {% render 'css-variables', dir: dir %}
+
+    {{ 'theme.css' | asset_url | stylesheet_tag }}
+    <script>document.documentElement.classList.replace('no-js', 'js');</script>
+    <script>
+      window.theme = {
+        routes: {
+          root: {{ routes.root_url | json }},
+          cartAdd: {{ routes.cart_add_url | json }},
+          cartChange: {{ routes.cart_change_url | json }},
+          cartUpdate: {{ routes.cart_update_url | json }},
+          cart: {{ routes.cart_url | json }},
+          predictiveSearch: {{ routes.predictive_search_url | json }}
+        },
+        cartType: {{ settings.cart_type | json }},
+        whatsapp: {{ settings.whatsapp_number | remove: '+' | remove: ' ' | json }},
+        strings: {
+          added: {{ 'cart.item_added' | t | json }},
+          viewCart: {{ 'cart.view_cart' | t | json }},
+          error: {{ 'cart.error' | t | json }},
+          copied: {{ 'general.copied' | t | json }},
+          linkCopied: {{ 'products.link_copied' | t | json }},
+          addToCart: {{ 'products.add_to_cart' | t | json }},
+          soldOut: {{ 'products.sold_out' | t | json }},
+          unavailable: {{ 'products.unavailable' | t | json }},
+          waIntro: {{ 'cart.whatsapp_intro' | t | json }},
+          waTotal: {{ 'cart.subtotal' | t | json }}
+        }
+      };
+    </script>
+    <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+
+    {{ content_for_header }}
+  </head>
+
+  <body class="color-{{ first_scheme.id }} template-{{ template.name }}{% if settings.animations %} animate{% endif %}">
+    <a class="skip-link" href="#MainContent">{{ 'general.skip_to_content' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {% render 'whatsapp-float' %}
+    {% section 'cart-drawer' %}
+
+    <div class="scrim" data-scrim hidden></div>
+    <div class="toast" data-toast role="status" aria-live="polite" hidden></div>
+  </body>
+</html>

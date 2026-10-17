@@ -1,0 +1,20 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px">
+  <div class="page-width narrow" style="--max: {{ section.settings.max_width }}ch">
+    {%- if section.settings.show_title -%}<h1 class="page-heading">{{ page.title | escape }}</h1>{%- endif -%}
+    <div class="rte">{{ page.content }}</div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Page content",
+  "class": "section-main-page",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "show_title", "label": "Show page title", "default": true },
+    { "type": "range", "id": "max_width", "label": "Text width", "min": 40, "max": 120, "step": 5, "unit": "ch", "default": 75 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,109 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "collection": {
+          "type": "collection_link",
+          "settings": {}
+        },
+        "title": {
+          "type": "title",
+          "settings": {
+            "size": "large"
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "stock": {
+          "type": "inventory",
+          "settings": {}
+        },
+        "variants": {
+          "type": "variant_picker",
+          "settings": {
+            "style": "buttons",
+            "show_prices": true
+          }
+        },
+        "quantity": {
+          "type": "quantity",
+          "settings": {}
+        },
+        "buy": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true
+          }
+        },
+        "whatsapp": {
+          "type": "whatsapp",
+          "settings": {
+            "label": "اطلب مباشرة عبر واتساب",
+            "message": "مرحبًا، أرغب بطلب:"
+          }
+        },
+        "perks": {
+          "type": "perks",
+          "settings": {}
+        },
+        "share": {
+          "type": "share",
+          "settings": {}
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "collapsible": true,
+            "heading": "تفاصيل المنتج"
+          }
+        },
+        "delivery": {
+          "type": "collapsible",
+          "settings": {
+            "heading": "التوصيل والدفع",
+            "content": "<p>نوصّل الطلبات داخل الكويت، ويمكنك أيضًا الاستلام من فرعنا في حولي، شارع موسى بن نصير. الدفع نقدًا أو عبر كي نت وفيزا / ماستر.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "collection",
+        "title",
+        "price",
+        "stock",
+        "variants",
+        "quantity",
+        "buy",
+        "whatsapp",
+        "perks",
+        "share",
+        "description",
+        "delivery"
+      ],
+      "settings": {
+        "sticky_bar": true,
+        "zoom": true
+      }
+    },
+    "related": {
+      "type": "product-recommendations",
+      "settings": {
+        "eyebrow": "قد يعجبك أيضًا",
+        "heading": "منتجات مشابهة"
+      }
+    },
+    "recent": {
+      "type": "recently-viewed",
+      "settings": {
+        "heading": "شاهدتها مؤخرًا"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "related",
+    "recent"
+  ]
+}

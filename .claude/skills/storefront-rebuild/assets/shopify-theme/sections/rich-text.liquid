@@ -1,0 +1,33 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px">
+  <div class="page-width rich-text rich-text--{{ section.settings.align }}" style="--max: {{ section.settings.max_width }}ch">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'eyebrow' -%}<p class="eyebrow" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</p>
+        {%- when 'heading' -%}<h2 class="h-{{ block.settings.size }}" {{ block.shopify_attributes }}>{{ block.settings.heading }}</h2>
+        {%- when 'text' -%}<div class="rte" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+        {%- when 'button' -%}<div class="btn-row" {{ block.shopify_attributes }}><a class="btn btn--{{ block.settings.style }}" href="{{ block.settings.link }}">{{ block.settings.label | escape }}</a></div>
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Rich text",
+  "class": "section-rich-text",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "select", "id": "align", "label": "Alignment", "default": "center", "options": [ { "value": "start", "label": "Start" }, { "value": "center", "label": "Center" } ] },
+    { "type": "range", "id": "max_width", "label": "Text width", "min": 30, "max": 100, "step": 5, "unit": "ch", "default": 65 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "blocks": [
+    { "type": "eyebrow", "name": "Eyebrow", "settings": [ { "type": "text", "id": "text", "label": "Text", "default": "من نحن" } ] },
+    { "type": "heading", "name": "Heading", "settings": [ { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "قصتنا" }, { "type": "select", "id": "size", "label": "Size", "default": "medium", "options": [ { "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" } ] } ] },
+    { "type": "text", "name": "Text", "settings": [ { "type": "richtext", "id": "text", "label": "Text", "default": "<p>اكتب هنا عن متجرك ومنتجاتك.</p>" } ] },
+    { "type": "button", "name": "Button", "settings": [ { "type": "text", "id": "label", "label": "Label", "default": "تسوق الآن" }, { "type": "url", "id": "link", "label": "Link" }, { "type": "select", "id": "style", "label": "Style", "default": "solid", "options": [ { "value": "solid", "label": "Solid" }, { "value": "outline", "label": "Outline" } ] } ] }
+  ],
+  "presets": [ { "name": "Rich text", "blocks": [ { "type": "eyebrow" }, { "type": "heading" }, { "type": "text" } ] } ]
+}
+{% endschema %}

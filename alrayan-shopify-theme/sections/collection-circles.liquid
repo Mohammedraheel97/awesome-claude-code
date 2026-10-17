@@ -1,0 +1,60 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px">
+  <div class="page-width">
+    {% render 'section-heading', eyebrow: section.settings.eyebrow, heading: section.settings.heading, align: section.settings.align, size: section.settings.heading_size, link_label: section.settings.link_label, link_url: section.settings.link_url %}
+    <div class="circles circles--{{ section.settings.size }}{% if section.settings.wrap %} circles--wrap{% endif %}">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign c = block.settings.collection
+          assign img = block.settings.image | default: c.featured_image
+          assign fallback = 'collections.collection' | t
+          assign label = block.settings.label | default: c.title | default: fallback
+          assign url = c.url | default: routes.collections_url
+        -%}
+        <a class="circle" href="{{ url }}" {{ block.shopify_attributes }}>
+          <span class="circle-img">
+            {%- if img != blank -%}
+              {{ img | image_url: width: 300 | image_tag: loading: 'lazy', widths: '150,220,300', sizes: '120px', alt: '' }}
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
+            {%- endif -%}
+          </span>
+          <span class="circle-name">{{ label | escape }}</span>
+          {%- if section.settings.show_count and c != blank -%}<small>{{ 'collections.products_count' | t: count: c.products_count }}</small>{%- endif -%}
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection circles",
+  "class": "section-circles",
+  "max_blocks": 30,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "تشكيلة واسعة" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "تسوق حسب القسم" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "default": "medium", "options": [ { "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" } ] },
+    { "type": "select", "id": "align", "label": "Heading alignment", "default": "start", "options": [ { "value": "start", "label": "Start" }, { "value": "center", "label": "Center" } ] },
+    { "type": "text", "id": "link_label", "label": "Link label", "default": "جميع الأقسام" },
+    { "type": "url", "id": "link_url", "label": "Link", "default": "/collections" },
+    { "type": "select", "id": "size", "label": "Circle size", "default": "medium", "options": [ { "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" } ] },
+    { "type": "checkbox", "id": "wrap", "label": "Wrap onto several rows instead of scrolling", "default": false },
+    { "type": "checkbox", "id": "show_count", "label": "Show product count", "default": false },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40 }
+  ],
+  "blocks": [
+    {
+      "type": "collection", "name": "Collection",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "image_picker", "id": "image", "label": "Custom image", "info": "Leave empty to use the collection image" },
+        { "type": "text", "id": "label", "label": "Custom label" }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Collection circles", "blocks": [ { "type": "collection" }, { "type": "collection" }, { "type": "collection" }, { "type": "collection" }, { "type": "collection" }, { "type": "collection" } ] } ]
+}
+{% endschema %}

@@ -1,0 +1,67 @@
+{%- comment -%}
+  Product card used in every grid and carousel.
+  Accepts: product {Product}, lazy {Boolean} (default true), sizes {String} (optional)
+{%- endcomment -%}
+{%- liquid
+  assign lazy_load = true
+  if lazy == false
+    assign lazy_load = false
+  endif
+  assign img_sizes = sizes | default: '(min-width: 1200px) 260px, (min-width: 750px) 30vw, 50vw'
+  assign first_variant = product.selected_or_first_available_variant
+  assign on_sale = false
+  if product.compare_at_price > product.price and product.price_varies == false
+    assign on_sale = true
+  endif
+  assign new_tag = settings.badge_new_tag | strip | downcase
+  assign is_new = false
+  if new_tag != blank
+    for tag in product.tags
+      assign t_down = tag | downcase
+      if t_down == new_tag
+        assign is_new = true
+      endif
+    endfor
+  endif
+-%}
+<article class="card card--{{ settings.card_image_ratio }}">
+  <a class="card-media" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+    {%- if product.featured_media -%}
+      {%- if lazy_load -%}
+        {{ product.featured_media | image_url: width: 800 | image_tag: loading: 'lazy', widths: '240,360,480,640,800', sizes: img_sizes, alt: product.featured_media.alt | default: product.title, class: 'card-img' }}
+      {%- else -%}
+        {{ product.featured_media | image_url: width: 800 | image_tag: widths: '240,360,480,640,800', sizes: img_sizes, alt: product.featured_media.alt | default: product.title, class: 'card-img' }}
+      {%- endif -%}
+      {%- if settings.card_secondary_image and product.media[1] -%}
+        {{ product.media[1] | image_url: width: 800 | image_tag: loading: 'lazy', widths: '240,360,480,640,800', sizes: img_sizes, alt: '', class: 'card-img card-img--alt' }}
+      {%- endif -%}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder card-img' }}
+    {%- endif -%}
+    {%- if product.available == false and settings.badge_soldout -%}
+      <span class="badge badge--soldout">{{ 'products.sold_out' | t }}</span>
+    {%- elsif on_sale and settings.badge_sale -%}
+      {%- assign pct = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round -%}
+      <span class="badge badge--sale">{{ 'products.percent_off' | t: percent: pct }}</span>
+    {%- elsif is_new -%}
+      <span class="badge badge--new">{{ 'products.new' | t }}</span>
+    {%- endif -%}
+  </a>
+  <div class="card-body">
+    {%- if settings.card_show_vendor -%}<span class="card-vendor">{{ product.vendor }}</span>{%- endif -%}
+    <a class="card-title" href="{{ product.url }}">{{ product.title | escape }}</a>
+    {% render 'price', product: product %}
+    {%- if settings.card_quick_add -%}
+      {%- if product.available == false -%}
+        <button class="btn btn--{{ settings.card_button_style }} btn--block" type="button" disabled>{{ 'products.sold_out' | t }}</button>
+      {%- elsif product.has_only_default_variant -%}
+        {%- form 'product', product, class: 'card-form', data-product-form: '' -%}
+          <input type="hidden" name="id" value="{{ first_variant.id }}">
+          <button class="btn btn--{{ settings.card_button_style }} btn--block" type="submit" name="add">{{ 'products.add_to_cart' | t }}</button>
+        {%- endform -%}
+      {%- else -%}
+        <a class="btn btn--soft btn--block" href="{{ product.url }}">{{ 'products.choose_options' | t }}</a>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</article>

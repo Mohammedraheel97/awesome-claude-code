@@ -1,0 +1,27 @@
+{%- comment -%} Removable chips for active filters. Accepts: results {Collection|Search}, clear_url {String} {%- endcomment -%}
+{%- liquid
+  assign any_active = false
+  for filter in results.filters
+    if filter.active_values.size > 0 or filter.min_value.value or filter.max_value.value
+      assign any_active = true
+    endif
+  endfor
+-%}
+{%- if any_active -%}
+  <div class="active-filters">
+    {%- for filter in results.filters -%}
+      {%- for value in filter.active_values -%}
+        <a class="chip chip--active" href="{{ value.url_to_remove }}">{{ value.label | escape }} {% render 'icon', name: 'close', size: 14 %}</a>
+      {%- endfor -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- if filter.min_value.value or filter.max_value.value -%}
+          <a class="chip chip--active" href="{{ filter.url_to_remove }}">
+            {{- filter.min_value.value | default: 0 | money }} – {{ filter.max_value.value | default: filter.range_max | money -}}
+            {% render 'icon', name: 'close', size: 14 %}
+          </a>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    <a class="link-clear" href="{{ clear_url }}">{{ 'collections.clear_all' | t }}</a>
+  </div>
+{%- endif -%}

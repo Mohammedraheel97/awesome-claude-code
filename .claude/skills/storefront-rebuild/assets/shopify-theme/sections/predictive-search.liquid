@@ -1,0 +1,35 @@
+{%- comment -%} Rendered by /search/suggest?section_id=predictive-search for the header's live search. {%- endcomment -%}
+{%- if predictive_search.performed -%}
+  {%- assign products = predictive_search.resources.products -%}
+  {%- assign colls = predictive_search.resources.collections -%}
+  {%- if products.size > 0 or colls.size > 0 -%}
+    {%- if colls.size > 0 -%}
+      <div class="sr-colls">
+        {%- for c in colls -%}<a class="chip" href="{{ c.url }}">{{ c.title | escape }}</a>{%- endfor -%}
+      </div>
+    {%- endif -%}
+    {%- if products.size > 0 -%}
+      <ul class="sr-list" role="list">
+        {%- for p in products -%}
+          <li>
+            <a href="{{ p.url }}">
+              {%- if p.featured_media -%}{{ p.featured_media | image_url: width: 120 | image_tag: loading: 'lazy', alt: '' }}{%- endif -%}
+              <span>{{ p.title | escape }}{%- if p.vendor != blank and settings.card_show_vendor -%}<small>{{ p.vendor | escape }}</small>{%- endif -%}</span>
+              {%- if settings.predictive_search_price -%}<b>{% if p.price_varies %}{{ 'products.from' | t }} {% endif %}{{ p.price_min | money }}</b>{%- endif -%}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+    <a class="sr-all" href="{{ routes.search_url }}?q={{ predictive_search.terms | url_encode }}&type=product">{{ 'search.see_all' | t: terms: predictive_search.terms }}</a>
+  {%- else -%}
+    <p class="sr-empty">{{ 'search.no_results' | t: terms: predictive_search.terms }}</p>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Predictive search",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,148 @@
+{%- liquid
+  assign menu = section.settings.menu
+  assign logo = section.settings.logo | default: settings.logo
+  assign search_ph = 'search.placeholder' | t
+  if section.settings.search_placeholder != blank
+    assign search_ph = section.settings.search_placeholder
+  endif
+-%}
+<header class="site-header color-{{ section.settings.color_scheme }}{% if section.settings.sticky %} is-sticky{% endif %} header--{{ section.settings.layout }}" data-header>
+  <div class="page-width header-inner">
+    <button class="icon-btn menu-btn" type="button" data-open="MenuDrawer" aria-controls="MenuDrawer" aria-label="{{ 'general.menu' | t }}">{% render 'icon', name: 'menu' %}</button>
+
+    <a class="brand" href="{{ routes.root_url }}">
+      {%- if logo != blank -%}
+        {{ logo | image_url: width: 400 | image_tag: class: 'brand-logo', style: 'width: var(--logo-width)', widths: '120,200,300,400', sizes: '(min-width: 750px) 200px, 120px', alt: shop.name }}
+      {%- else -%}
+        <span class="brand-fallback">{{ shop.name | slice: 0 }}</span>
+      {%- endif -%}
+      {%- if section.settings.show_name -%}
+        <span class="brand-text">
+          <strong>{{ section.settings.brand_name | default: shop.name | escape }}</strong>
+          {%- if section.settings.tagline != blank -%}<small>{{ section.settings.tagline | escape }}</small>{%- endif -%}
+        </span>
+      {%- else -%}
+        <span class="visually-hidden">{{ shop.name }}</span>
+      {%- endif -%}
+    </a>
+
+    {%- if menu != blank -%}
+      <nav class="main-nav" aria-label="{{ 'general.main_menu' | t }}">
+        <ul role="list">
+          {%- for link in menu.links -%}
+            <li class="{% if link.links != blank %}has-dropdown{% endif %}">
+              <a href="{{ link.url }}"{% if link.active or link.child_active %} class="is-active" aria-current="page"{% endif %}>
+                {{ link.title | escape }}
+                {%- if link.links != blank -%}{% render 'icon', name: 'chevron-down', size: 14 %}{%- endif -%}
+              </a>
+              {%- if link.links != blank -%}
+                <ul class="dropdown color-{{ section.settings.dropdown_scheme }}" role="list">
+                  {%- for child in link.links -%}
+                    <li><a href="{{ child.url }}"{% if child.active %} aria-current="page"{% endif %}>{{ child.title | escape }}</a></li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
+    <div class="header-tools">
+      {%- if section.settings.show_search -%}
+        <button class="icon-btn" type="button" data-search-toggle aria-expanded="false" aria-controls="SearchPanel" aria-label="{{ 'general.search' | t }}">{% render 'icon', name: 'search' %}</button>
+      {%- endif -%}
+      {%- if section.settings.show_account and shop.customer_accounts_enabled -%}
+        <a class="icon-btn hide-mobile" href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" aria-label="{{ 'general.account' | t }}">{% render 'icon', name: 'account' %}</a>
+      {%- endif -%}
+      <a class="icon-btn cart-btn" href="{{ routes.cart_url }}" data-open="CartDrawer" aria-label="{{ 'general.cart' | t }}">
+        {% render 'icon', name: 'cart', size: 23 %}
+        <span class="cart-count" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
+      </a>
+      {%- if section.settings.show_language and localization.available_languages.size > 1 -%}
+        {%- form 'localization', class: 'lang-form', data-localization: '' -%}
+          {%- for language in localization.available_languages -%}
+            {%- if language.iso_code != localization.language.iso_code -%}
+              <button class="lang-btn" type="submit" name="locale_code" value="{{ language.iso_code }}" lang="{{ language.iso_code }}">{{ language.endonym_name | slice: 0, 3 | upcase }}</button>
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endform -%}
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if section.settings.show_search -%}
+    <div class="search-panel color-{{ section.settings.dropdown_scheme }}" id="SearchPanel" hidden>
+      <form class="page-width search-form" action="{{ routes.search_url }}" method="get" role="search">
+        <input type="hidden" name="type" value="product">
+        {% render 'icon', name: 'search', size: 20 %}
+        <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ search_ph | escape }}" aria-label="{{ 'general.search' | t }}" autocomplete="off" data-predictive-input{% if settings.predictive_search %} data-predictive{% endif %}>
+        <button class="icon-btn" type="button" data-search-toggle aria-label="{{ 'general.close' | t }}">{% render 'icon', name: 'close', size: 20 %}</button>
+      </form>
+      <div class="page-width" data-predictive-results></div>
+    </div>
+  {%- endif -%}
+</header>
+
+<aside class="drawer drawer--start color-{{ section.settings.dropdown_scheme }}" id="MenuDrawer" aria-hidden="true" aria-label="{{ 'general.menu' | t }}" tabindex="-1">
+  <div class="drawer-head"><strong>{{ 'general.menu' | t }}</strong><button class="icon-btn" type="button" data-close aria-label="{{ 'general.close' | t }}">{% render 'icon', name: 'close' %}</button></div>
+  <nav class="menu-list">
+    {%- if menu != blank -%}
+      {%- for link in menu.links -%}
+        {%- if link.links != blank -%}
+          <details>
+            <summary>{{ link.title | escape }} {% render 'icon', name: 'chevron-down', size: 16 %}</summary>
+            <a href="{{ link.url }}">{{ 'general.view_all' | t }}</a>
+            {%- for child in link.links -%}<a href="{{ child.url }}">{{ child.title | escape }}</a>{%- endfor -%}
+          </details>
+        {%- else -%}
+          <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>{{ link.title | escape }}</a>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {%- if shop.customer_accounts_enabled -%}
+      <a href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}">{{ 'general.account' | t }}</a>
+    {%- endif -%}
+  </nav>
+  {% render 'social-icons', class: 'drawer-social' %}
+</aside>
+
+{%- if request.page_type == 'index' -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "url": {{ request.origin | append: routes.root_url | json }}
+      {%- if logo != blank -%},
+      "logo": {{ logo | image_url: width: 500 | prepend: 'https:' | json }}
+      {%- endif %}
+    }
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "section-header",
+  "enabled_on": { "groups": ["header"] },
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-3" },
+    { "type": "color_scheme", "id": "dropdown_scheme", "label": "Menu, search & dropdown color scheme", "default": "scheme-2" },
+    { "type": "select", "id": "layout", "label": "Desktop layout", "default": "split", "options": [ { "value": "split", "label": "Logo, menu, icons" }, { "value": "center", "label": "Centered logo, menu below" } ] },
+    { "type": "checkbox", "id": "sticky", "label": "Sticky header", "default": true },
+    { "type": "header", "content": "Logo" },
+    { "type": "image_picker", "id": "logo", "label": "Logo", "info": "Leave empty to use the logo from theme settings" },
+    { "type": "checkbox", "id": "show_name", "label": "Show store name next to the logo", "default": true },
+    { "type": "text", "id": "brand_name", "label": "Name", "default": "الريان" },
+    { "type": "text", "id": "tagline", "label": "Tagline", "default": "مطحنة ومحمصة" },
+    { "type": "header", "content": "Navigation" },
+    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" },
+    { "type": "checkbox", "id": "show_search", "label": "Show search", "default": true },
+    { "type": "text", "id": "search_placeholder", "label": "Search placeholder", "default": "ابحث عن قهوة، مكسرات، بهارات…" },
+    { "type": "checkbox", "id": "show_account", "label": "Show account icon", "default": true },
+    { "type": "checkbox", "id": "show_language", "label": "Show language switcher", "info": "Appears when the store has more than one language", "default": true }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,86 @@
+{%- liquid
+  assign threshold = settings.cart_progress_threshold | times: 100
+  assign remaining = threshold | minus: cart.total_price
+  assign progress = 0
+  if threshold > 0
+    assign progress = cart.total_price | times: 100 | divided_by: threshold | at_most: 100
+  endif
+-%}
+<aside class="drawer drawer--end color-{{ section.settings.color_scheme }}" id="CartDrawer" aria-hidden="true" aria-label="{{ 'general.cart' | t }}" tabindex="-1" data-cart-drawer>
+  <div class="drawer-head drawer-head--accent">
+    <strong>{{ 'general.cart' | t }}</strong>
+    <button class="icon-btn" type="button" data-close aria-label="{{ 'general.close' | t }}">{% render 'icon', name: 'close' %}</button>
+  </div>
+  <div class="drawer-content" data-cart-content data-count="{{ cart.item_count }}">
+    {%- if cart.item_count > 0 -%}
+      {%- if settings.cart_progress and threshold > 0 -%}
+        <div class="cart-progress">
+          {%- if remaining > 0 -%}
+            {%- assign remaining_money = remaining | money -%}
+            <p>{{ settings.cart_progress_text | escape | replace: '[amount]', remaining_money }}</p>
+            <span class="bar"><span style="width: {{ progress }}%"></span></span>
+          {%- else -%}
+            <p>{{ settings.cart_progress_done | escape }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+      <ul class="cart-lines" role="list">
+        {%- for item in cart.items -%}
+          <li class="line">
+            <a href="{{ item.url }}">
+              {%- if item.image -%}{{ item.image | image_url: width: 160 | image_tag: loading: 'lazy', alt: '' }}{%- endif -%}
+            </a>
+            <div>
+              <a class="line-title" href="{{ item.url }}">{{ item.product.title | escape }}</a>
+              {%- unless item.product.has_only_default_variant -%}<small class="muted">{{ item.variant.title | escape }}</small>{%- endunless -%}
+              {%- for p in item.properties -%}{%- unless p.last == blank or p.first contains '_' -%}<small class="muted">{{ p.first }}: {{ p.last }}</small>{%- endunless -%}{%- endfor -%}
+              <div class="price"><span class="price-now">{{ item.final_line_price | money }}</span>{%- if item.original_line_price > item.final_line_price -%}<s class="price-was">{{ item.original_line_price | money }}</s>{%- endif -%}</div>
+              <button class="link-remove" type="button" data-line="{{ forloop.index }}" data-qty="0">{{ 'cart.remove' | t }}</button>
+            </div>
+            <div class="qty">
+              <button type="button" data-line="{{ forloop.index }}" data-qty="{{ item.quantity | minus: 1 }}" aria-label="{{ 'products.decrease' | t }}">{% render 'icon', name: 'minus', size: 16 %}</button>
+              <output>{{ item.quantity }}</output>
+              <button type="button" data-line="{{ forloop.index }}" data-qty="{{ item.quantity | plus: 1 }}" aria-label="{{ 'products.increase' | t }}">{% render 'icon', name: 'plus', size: 16 %}</button>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+      <div class="cart-foot">
+        {%- if settings.cart_note -%}
+          <details class="cart-note">
+            <summary>{{ 'cart.note' | t }}</summary>
+            <textarea name="note" rows="2" data-cart-note aria-label="{{ 'cart.note' | t }}">{{ cart.note }}</textarea>
+          </details>
+        {%- endif -%}
+        {%- for discount in cart.cart_level_discount_applications -%}
+          <div class="totals-row"><span>{{ discount.title | escape }}</span><span>-{{ discount.total_allocated_amount | money }}</span></div>
+        {%- endfor -%}
+        <div class="totals-row totals-row--grand"><span>{{ 'cart.subtotal' | t }}</span><span>{{ cart.total_price | money_with_currency }}</span></div>
+        <p class="muted small">{{ 'cart.taxes_note' | t }}</p>
+        <form action="{{ routes.cart_url }}" method="post">
+          <button class="btn btn--lg btn--block" type="submit" name="checkout">{{ 'cart.checkout' | t }}</button>
+        </form>
+        {%- if settings.cart_whatsapp and settings.whatsapp_number != blank -%}
+          <button class="btn btn--lg btn--block btn--whatsapp" type="button" data-whatsapp-cart>{% render 'icon', name: 'whatsapp', size: 20 %} {{ 'cart.whatsapp_checkout' | t }}</button>
+        {%- endif -%}
+        <a class="link-plain" href="{{ routes.cart_url }}">{{ 'cart.view_cart' | t }}</a>
+      </div>
+    {%- else -%}
+      <div class="cart-empty">
+        {% render 'icon', name: 'cart', size: 56 %}
+        <p>{{ 'cart.empty' | t }}</p>
+        <a class="btn" href="{{ section.settings.empty_link | default: routes.all_products_collection_url }}">{{ 'cart.continue_shopping' | t }}</a>
+      </div>
+    {%- endif -%}
+  </div>
+</aside>
+
+{% schema %}
+{
+  "name": "Cart drawer",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "url", "id": "empty_link", "label": "\"Continue shopping\" link" }
+  ]
+}
+{% endschema %}

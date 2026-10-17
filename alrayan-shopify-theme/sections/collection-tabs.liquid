@@ -1,0 +1,58 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px; --cols: {{ section.settings.columns_desktop }}; --cols-m: 2" data-tabs>
+  <div class="page-width">
+    {% render 'section-heading', eyebrow: section.settings.eyebrow, heading: section.settings.heading, align: 'center', size: section.settings.heading_size %}
+    <div class="tabs" role="tablist">
+      {%- for block in section.blocks -%}
+        {%- assign fallback = 'collections.collection' | t -%}
+        {%- assign label = block.settings.label | default: block.settings.collection.title | default: fallback -%}
+        <button class="tab" type="button" role="tab" id="Tab-{{ section.id }}-{{ forloop.index }}" aria-controls="Panel-{{ section.id }}-{{ forloop.index }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-tab {{ block.shopify_attributes }}>{{ label | escape }}</button>
+      {%- endfor -%}
+    </div>
+    {%- for block in section.blocks -%}
+      {%- assign c = block.settings.collection -%}
+      <div class="tab-panel" role="tabpanel" id="Panel-{{ section.id }}-{{ forloop.index }}" aria-labelledby="Tab-{{ section.id }}-{{ forloop.index }}"{% unless forloop.first %} hidden{% endunless %}>
+        <div class="grid grid--fixed">
+          {%- if c != blank and c.products_count > 0 -%}
+            {%- for product in c.products limit: section.settings.products_to_show -%}{% render 'product-card', product: product %}{%- endfor -%}
+          {%- else -%}
+            {%- for i in (1..4) -%}
+              <article class="card card--{{ settings.card_image_ratio }}"><span class="card-media">{{ 'product-' | append: i | placeholder_svg_tag: 'placeholder card-img' }}</span><div class="card-body"><span class="card-title">{{ 'products.example_title' | t }}</span></div></article>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+        {%- if c != blank and section.settings.show_view_all -%}
+          <div class="center-row"><a class="btn btn--outline" href="{{ c.url }}">{{ 'general.view_all' | t }} — {{ c.title | escape }}</a></div>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection tabs",
+  "class": "section-tabs",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "من منتجاتنا" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "اكتشف تشكيلة الريان" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "default": "medium", "options": [ { "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" } ] },
+    { "type": "range", "id": "products_to_show", "label": "Products per tab", "min": 2, "max": 16, "step": 1, "default": 8 },
+    { "type": "range", "id": "columns_desktop", "label": "Products per row on desktop", "min": 2, "max": 6, "step": 1, "default": 4 },
+    { "type": "checkbox", "id": "show_view_all", "label": "Show \"View all\" button", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "blocks": [
+    {
+      "type": "tab", "name": "Tab",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "text", "id": "label", "label": "Tab label", "info": "Defaults to the collection title" }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Collection tabs", "blocks": [ { "type": "tab" }, { "type": "tab" }, { "type": "tab" } ] } ]
+}
+{% endschema %}

@@ -1,0 +1,80 @@
+<section class="section color-{{ section.settings.color_scheme }}" id="store-{{ section.id }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px">
+  <div class="page-width visit{% if section.settings.map_first %} visit--map-first{% endif %}">
+    <div class="visit-copy">
+      {%- if section.settings.eyebrow != blank -%}<p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      {%- if section.settings.heading != blank -%}<h2 class="h-medium">{{ section.settings.heading }}</h2>{%- endif -%}
+      {%- if section.settings.text != blank -%}<div class="rte">{{ section.settings.text }}</div>{%- endif -%}
+      {%- if section.blocks.size > 0 -%}
+        <dl class="visit-list">
+          {%- for block in section.blocks -%}
+            <div {{ block.shopify_attributes }}>
+              <dt>{% render 'icon', name: block.settings.icon, size: 18 %} {{ block.settings.label | escape }}</dt>
+              <dd>{{ block.settings.value }}</dd>
+            </div>
+          {%- endfor -%}
+        </dl>
+      {%- endif -%}
+      <div class="btn-row">
+        {%- if section.settings.map_query != blank and section.settings.directions_label != blank -%}
+          <a class="btn" href="https://www.google.com/maps/search/?api=1&query={{ section.settings.map_query | url_encode }}" target="_blank" rel="noopener">{{ section.settings.directions_label | escape }}</a>
+        {%- endif -%}
+        {%- if settings.whatsapp_number != blank and section.settings.whatsapp_label != blank -%}
+          <a class="btn btn--outline" href="https://wa.me/{{ settings.whatsapp_number | remove: '+' | remove: ' ' }}" target="_blank" rel="noopener">{{ section.settings.whatsapp_label | escape }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+    <div class="map-card">
+      {%- if section.settings.image != blank -%}
+        {{ section.settings.image | image_url: width: 1200 | image_tag: loading: 'lazy', widths: '500,800,1200', sizes: '(min-width: 750px) 50vw, 100vw', alt: section.settings.image.alt }}
+      {%- elsif section.settings.map_query != blank -%}
+        <iframe title="{{ section.settings.heading | strip_html | escape }}" src="https://maps.google.com/maps?q={{ section.settings.map_query | url_encode }}&amp;z={{ section.settings.zoom }}&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag: 'placeholder' }}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Store info & map",
+  "class": "section-store",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "من نحن" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "مطحنة ومحمصة الريان" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>مطحنة ومحمصة الريان اختيارك الأول لأجود أنواع القهوة المحمصة الطازجة، وأشهى أنواع المكسرات المتميزة بنكهاتنا الفريدة، وأفضل تشكيلة من البهارات.</p>" },
+    { "type": "header", "content": "Map" },
+    { "type": "text", "id": "map_query", "label": "Address or coordinates for the map", "default": "29.3755821,47.9773173" },
+    { "type": "range", "id": "zoom", "label": "Map zoom", "min": 10, "max": 19, "step": 1, "default": 16 },
+    { "type": "image_picker", "id": "image", "label": "Image instead of map (optional)" },
+    { "type": "checkbox", "id": "map_first", "label": "Show map first", "default": false },
+    { "type": "header", "content": "Buttons" },
+    { "type": "text", "id": "directions_label", "label": "Directions button", "default": "الاتجاهات على الخريطة" },
+    { "type": "text", "id": "whatsapp_label", "label": "WhatsApp button", "default": "راسلنا على واتساب" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "detail", "name": "Detail",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "default": "pin", "options": [ { "value": "pin", "label": "Location" }, { "value": "clock", "label": "Clock" }, { "value": "phone", "label": "Phone" }, { "value": "whatsapp", "label": "WhatsApp" }, { "value": "truck", "label": "Delivery" }, { "value": "card", "label": "Payment" } ] },
+        { "type": "text", "id": "label", "label": "Label", "default": "العنوان" },
+        { "type": "inline_richtext", "id": "value", "label": "Value", "default": "حولي، قطعة 1، شارع موسى بن نصير، مقابل مسجد المطيري" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Store info & map",
+      "blocks": [
+        { "type": "detail" },
+        { "type": "detail", "settings": { "icon": "clock", "label": "ساعات العمل", "value": "يوميًا 10:30 صباحًا – 12:00 منتصف الليل · الجمعة من 1:30 ظهرًا" } },
+        { "type": "detail", "settings": { "icon": "phone", "label": "اتصل بنا", "value": "<a href=\"tel:+96592286230\">+965 9228 6230</a> · <a href=\"tel:+96592286229\">+965 9228 6229</a>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,31 @@
+<section class="section color-{{ section.settings.color_scheme }}" style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px" data-recommendations data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.limit }}&intent={{ section.settings.intent }}">
+  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+    <div class="page-width" data-recommendations-inner>
+      {% render 'section-heading', eyebrow: section.settings.eyebrow, heading: section.settings.heading, align: 'start', size: 'medium' %}
+      <div class="carousel" data-carousel>
+        <button class="rail-arrow rail-arrow--start" type="button" data-rail="-1" aria-label="{{ 'general.previous' | t }}">{% render 'icon', name: 'chevron', size: 22 %}</button>
+        <div class="rail" data-rail-track>
+          {%- for product in recommendations.products -%}{% render 'product-card', product: product %}{%- endfor -%}
+        </div>
+        <button class="rail-arrow rail-arrow--end" type="button" data-rail="1" aria-label="{{ 'general.next' | t }}">{% render 'icon', name: 'chevron', size: 22 %}</button>
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Product recommendations",
+  "class": "section-recommendations",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "قد يعجبك أيضًا" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "منتجات مشابهة" },
+    { "type": "select", "id": "intent", "label": "Recommendation type", "default": "related", "options": [ { "value": "related", "label": "Related products" }, { "value": "complementary", "label": "Complementary (set up in Search & Discovery)" } ] },
+    { "type": "range", "id": "limit", "label": "Products to show", "min": 2, "max": 12, "step": 1, "default": 10 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40 }
+  ],
+  "presets": [ { "name": "Product recommendations" } ]
+}
+{% endschema %}

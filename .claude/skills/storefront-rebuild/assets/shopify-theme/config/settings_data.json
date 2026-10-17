@@ -1,0 +1,24 @@
+{
+  "current": {
+    "logo_width": 64,
+    "color_schemes": {
+      "scheme-1": { "settings": { "background": "#FFF6F5", "surface": "#FFFFFF", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#2B1012", "accent": "#BD2932", "accent_hover": "#9A1F27", "on_accent": "#FFFFFF", "border": "#F3D2D0" } },
+      "scheme-2": { "settings": { "background": "#FFFFFF", "surface": "#FFF6F5", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#2B1012", "accent": "#BD2932", "accent_hover": "#9A1F27", "on_accent": "#FFFFFF", "border": "#F3D2D0" } },
+      "scheme-3": { "settings": { "background": "#BD2932", "surface": "#FFFFFF", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#FFFFFF", "accent": "#FFFFFF", "accent_hover": "#FBE4E3", "on_accent": "#BD2932", "border": "#D9646B" } },
+      "scheme-4": { "settings": { "background": "#4A0F15", "surface": "#FFFFFF", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#FBE3E3", "accent": "#FFFFFF", "accent_hover": "#FBE4E3", "on_accent": "#4A0F15", "border": "#6E2730" } },
+      "scheme-5": { "settings": { "background": "#FBE4E3", "surface": "#FFFFFF", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#2B1012", "accent": "#BD2932", "accent_hover": "#9A1F27", "on_accent": "#FFFFFF", "border": "#F0C4C2" } }
+    }
+  },
+  "presets": {
+    "Default": {
+      "logo_width": 64,
+      "color_schemes": {
+        "scheme-1": { "settings": { "background": "#FFF6F5", "surface": "#FFFFFF", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#2B1012", "accent": "#BD2932", "accent_hover": "#9A1F27", "on_accent": "#FFFFFF", "border": "#F3D2D0" } },
+        "scheme-2": { "settings": { "background": "#FFFFFF", "surface": "#FFF6F5", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#2B1012", "accent": "#BD2932", "accent_hover": "#9A1F27", "on_accent": "#FFFFFF", "border": "#F3D2D0" } },
+        "scheme-3": { "settings": { "background": "#BD2932", "surface": "#FFFFFF", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#FFFFFF", "accent": "#FFFFFF", "accent_hover": "#FBE4E3", "on_accent": "#BD2932", "border": "#D9646B" } },
+        "scheme-4": { "settings": { "background": "#4A0F15", "surface": "#FFFFFF", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#FBE3E3", "accent": "#FFFFFF", "accent_hover": "#FBE4E3", "on_accent": "#4A0F15", "border": "#6E2730" } },
+        "scheme-5": { "settings": { "background": "#FBE4E3", "surface": "#FFFFFF", "surface_text": "#2B1012", "surface_accent": "#BD2932", "text": "#2B1012", "accent": "#BD2932", "accent_hover": "#9A1F27", "on_accent": "#FFFFFF", "border": "#F0C4C2" } }
+      }
+    }
+  }
+}

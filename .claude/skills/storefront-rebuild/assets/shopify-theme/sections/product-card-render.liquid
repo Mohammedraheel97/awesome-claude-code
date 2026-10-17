@@ -1,0 +1,9 @@
+{%- comment -%} Renders one product card for the section rendering API (used by "Recently viewed"). {%- endcomment -%}
+{%- if product -%}{% render 'product-card', product: product %}{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product card",
+  "settings": []
+}
+{% endschema %}
