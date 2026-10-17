@@ -1,8 +1,9 @@
 # Alrayan Foods — rebuilt storefront
 
-Static, dependency-free rebuild of https://alrayan-foods.com/ using the visual theme of https://almoallemmill.com/
-(cream `#F5EDD6` background, brown `#3B2314` text, red `#C0392B` buttons, Barlow Condensed headings, 5px-radius buttons,
-centered-logo header, full-bleed hero, white product cards with red "add to cart" buttons, mosaic collection tiles, dark-brown footer).
+Static, dependency-free rebuild of https://alrayan-foods.com/ using the layout and typography of https://almoallemmill.com/
+(Barlow Condensed headings, 5px-radius buttons, centred-logo header, full-bleed hero, white product cards with "add to cart" buttons,
+mosaic collection tiles) and the colour scheme of the Alrayan logo: crimson `#BD2932` and white, with a soft red-tinted page
+background (`#FFF6F5`), deep wine text (`#2B1012`) and a wine-red footer (`#4A0F15`). All colours are CSS variables at the top of `assets/styles.css`.
 
 ## Run
 
