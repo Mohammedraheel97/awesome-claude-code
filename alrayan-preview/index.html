@@ -1,0 +1,43 @@
+<title>Alrayan Foods Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600&family=DM+Sans:wght@400;500&display=swap">
+<style>
+  /* Layout: a quiet index of six live pages, grouped by language. */
+  :root { --bg:#fbf7f1; --fg:#2b1d16; --muted:#6e5d52; --line:#e4d8c8; --red:#bd2932; --card:#fff;
+    --display:'El Messiri','Georgia',serif; --body:'DM Sans',system-ui,sans-serif; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#241713; --fg:#f6ece0; --muted:#bba99b; --line:#43302a; --red:#e2535c; --card:#2f1f19; color-scheme:dark } }
+  :root[data-theme="dark"] { --bg:#241713; --fg:#f6ece0; --muted:#bba99b; --line:#43302a; --red:#e2535c; --card:#2f1f19; color-scheme:dark }
+  body { background:var(--bg); color:var(--fg); font-family:var(--body); padding-block:48px;
+    padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); }
+  main { max-width:44rem; margin:0 auto; display:grid; gap:2rem; }
+  h1 { font-family:var(--display); font-size:clamp(2rem,6vw,3rem); margin:0; text-wrap:balance; }
+  p { margin:0; line-height:1.6; color:var(--muted); max-width:60ch; }
+  .group { display:grid; gap:.75rem; }
+  h2 { font-size:.75rem; letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin:0; }
+  .links { display:grid; grid-template-columns:repeat(auto-fit,minmax(10rem,1fr)); gap:.75rem; }
+  a { display:block; padding:1rem 1.1rem; background:var(--card); border:1px solid var(--line); border-radius:.9rem; color:var(--fg); text-decoration:none; font-weight:500; min-width:0; }
+  a:hover, a:focus-visible { border-color:var(--red); outline:none; }
+  a span { display:block; font-weight:400; font-size:.85rem; color:var(--muted); margin-top:.2rem; }
+</style>
+<main>
+  <header class="group">
+    <h1>Alrayan Foods</h1>
+    <p>Preview of the new Shopify theme with your real products, prices and photos. Open a page, then use your browser's back button to return here. Cart and checkout are not live in this preview.</p>
+  </header>
+  <section class="group" dir="rtl" lang="ar">
+    <h2 dir="ltr">Arabic (default)</h2>
+    <div class="links">
+      <a href="a-home-ar.html">الرئيسية<span>Homepage</span></a>
+      <a href="a-collection-ar.html">مكسرات محمصة<span>Collection</span></a>
+      <a href="a-product-ar.html">قهوة تركي<span>Product</span></a>
+    </div>
+  </section>
+  <section class="group">
+    <h2>English</h2>
+    <div class="links">
+      <a href="a-home-en.html">Homepage<span>Home</span></a>
+      <a href="a-collection-en.html">Roasted Nuts<span>Collection</span></a>
+      <a href="a-product-en.html">Turkish Coffee<span>Product</span></a>
+    </div>
+  </section>
+</main>
