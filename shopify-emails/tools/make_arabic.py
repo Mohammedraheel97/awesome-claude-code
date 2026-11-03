@@ -101,6 +101,66 @@ OC = [
     ("font-size:46px;line-height:44px", "font-size:46px;line-height:56px"),
 ]
 
+# ---------------------------------------------------------------- shipping confirmation
+SHIP = [
+    ("{% assign buyer_email_rtl = false %}{% if locale_direction == 'rtl' %}{% assign buyer_email_rtl = true %}{% endif %}", "{% assign buyer_email_rtl = true %}"),
+    ('<html lang="en"', '<html lang="ar"'),
+    ("{% capture email_title %}Your order is on the way{% endcapture %}", "{% capture email_title %}طلبك في الطريق إليك{% endcapture %}"),
+    ("{% capture hero_1 %}Your fit is{% endcapture %}{% capture hero_2 %}on the way.{% endcapture %}", "{% capture hero_1 %}إطلالتك{% endcapture %}{% capture hero_2 %}في الطريق إليك.{% endcapture %}"),
+    ("{% capture email_body %}Your order is on the way. Track your shipment to see the delivery status.{% endcapture %}", "{% capture email_body %}طلبك في الطريق إليك. تتبّع شحنتك لمعرفة حالة التوصيل.{% endcapture %}"),
+    ("{% capture email_title %}The last items in your order are on the way{% endcapture %}", "{% capture email_title %}آخر منتجات طلبك في الطريق إليك{% endcapture %}"),
+    ("{% capture hero_1 %}The last items{% endcapture %}{% capture hero_2 %}are on the way.{% endcapture %}", "{% capture hero_1 %}آخر المنتجات{% endcapture %}{% capture hero_2 %}في الطريق إليك.{% endcapture %}"),
+    ("{% capture email_body %}The last items in your order are on the way. Track your shipment to see the delivery status.{% endcapture %}", "{% capture email_body %}آخر منتجات طلبك في الطريق إليك. تتبّع شحنتك لمعرفة حالة التوصيل.{% endcapture %}"),
+    ("{% capture email_title %}Some items in your order are on the way{% endcapture %}", "{% capture email_title %}بعض منتجات طلبك في الطريق إليك{% endcapture %}"),
+    ("{% capture hero_1 %}Some items{% endcapture %}{% capture hero_2 %}are on the way.{% endcapture %}", "{% capture hero_1 %}بعض المنتجات{% endcapture %}{% capture hero_2 %}في الطريق إليك.{% endcapture %}"),
+    ("{% capture email_body %}Some items in your order are on the way. Track your shipment to see the delivery status.{% endcapture %}", "{% capture email_body %}بعض منتجات طلبك في الطريق إليك. تتبّع شحنتك لمعرفة حالة التوصيل.{% endcapture %}"),
+    ("{% capture email_title %}The last item in your order is on the way{% endcapture %}", "{% capture email_title %}آخر منتج في طلبك في الطريق إليك{% endcapture %}"),
+    ("{% capture hero_1 %}The last item{% endcapture %}{% capture hero_2 %}is on the way.{% endcapture %}", "{% capture hero_1 %}آخر منتج{% endcapture %}{% capture hero_2 %}في الطريق إليك.{% endcapture %}"),
+    ("{% capture email_body %}The last item in your order is on the way. Track your shipment to see the delivery status.{% endcapture %}", "{% capture email_body %}آخر منتج في طلبك في الطريق إليك. تتبّع شحنتك لمعرفة حالة التوصيل.{% endcapture %}"),
+    ("{% capture email_title %}One item in your order is on the way{% endcapture %}", "{% capture email_title %}منتج من طلبك في الطريق إليك{% endcapture %}"),
+    ("{% capture hero_1 %}One item{% endcapture %}{% capture hero_2 %}is on the way.{% endcapture %}", "{% capture hero_1 %}منتج واحد{% endcapture %}{% capture hero_2 %}في الطريق إليك.{% endcapture %}"),
+    ("{% capture email_body %}One item in your order is on the way. Track your shipment to see the delivery status.{% endcapture %}", "{% capture email_body %}منتج من طلبك في الطريق إليك. تتبّع شحنتك لمعرفة حالة التوصيل.{% endcapture %}"),
+    ("&mdash; order {{ order_name }}{% if fulfillment.estimated_delivery_at %}, arriving ", "&mdash; الطلب {{ order_name }}{% if fulfillment.estimated_delivery_at %}، يصل في "),
+    ("Order&nbsp;<span", "طلب&nbsp;<span"),
+    ("PO number {{ lo }}", "رقم أمر الشراء {{ lo }}"),
+    ("&#9679;&nbsp;Shipped", "&#9679;&nbsp;تم الشحن"),
+    ("{% if customer.first_name != blank %}Hi {{ bo }}", "{% if customer.first_name != blank %}مرحباً {{ bo }}"),
+    (">Ordered<", ">تم الطلب<"),
+    (">Packed<", ">تم التغليف<"),
+    (">Shipped</div>", ">تم الشحن</div>"),
+    (">Delivered<", ">تم التوصيل<"),
+    (">Estimated delivery<", ">موعد التوصيل المتوقع<"),
+    ("Tracking number{% else %}Tracking numbers", "رقم التتبع{% else %}أرقام التتبع"),
+    ("Track your package&nbsp;&rarr;", "تتبّع شحنتك&nbsp;&larr;"),
+    ("View your order&nbsp;&rarr;", "عرض طلبك&nbsp;&larr;"),
+    ("Track order with{% else %}Download to track with{% endif %}", "تتبّع الطلب عبر{% else %}حمّل التطبيق للتتبّع عبر{% endif %}"),
+    (">View your order</a>", ">عرض طلبك</a>"),
+    ("{% elsif shop.url %}or {% endif %}", "{% elsif shop.url %}أو {% endif %}"),
+    (">Visit our store</a>", ">زُر متجرنا</a>"),
+    (">In the box<", ">داخل الصندوق<"),
+    (">Items in this shipment<", ">المنتجات في هذه الشحنة<"),
+    ("{% if shipped_units == 1 %}item{% else %}items{% endif %}", "قطعة"),
+    ("{% if group.deliverable? %}For: {% else %}Part of: {% endif %}", "{% if group.deliverable? %}لـ: {% else %}جزء من: {% endif %}"),
+    (">Refunded<", ">مسترد<"),
+    ("> of {{ lo }}", "> من {{ lo }}"),
+    (">Shipping to<", ">الشحن إلى<"),
+    (">Shipping method<", ">طريقة الشحن<"),
+    (">Questions?<", ">عندك سؤال؟<"),
+    ("Reply to this email or message us on WhatsApp — we’re quick.", "رد على هذه الرسالة أو راسلنا على واتساب — نرد بسرعة."),
+    (">WhatsApp us<", ">راسلنا على واتساب<"),
+    ("'Hi 89, about my order '", "'مرحباً 89، بخصوص طلبي '"),
+    (">Shop</a>", ">المتجر</a>"),
+    (">Instagram</a>", ">إنستغرام</a>"),
+    (">WhatsApp</a>", ">واتساب</a>"),
+    ("If you have any questions, reply to this email or contact us at", "إذا كان لديك أي استفسار، رد على هذه الرسالة أو تواصل معنا على"),
+    ('<div class="x-wordmark" style="', '<div class="x-wordmark" dir="ltr" style="text-align:right;'),
+    ("font-size:52px;line-height:50px", "font-size:48px;line-height:66px"),
+    (".x-hero { font-size: 40px !important; line-height: 40px !important; }", ".x-hero { font-size: 38px !important; line-height: 54px !important; }"),
+    (".x-wordmark { font-size: 34px !important; line-height: 34px !important; }", ".x-wordmark { font-size: 34px !important; line-height: 44px !important; }"),
+    ("font-size:26px;line-height:28px", "font-size:26px;line-height:38px"),
+    ("font-size:46px;line-height:44px", "font-size:46px;line-height:56px"),
+]
+
 def ar_letterspacing(s):
     return re.sub(r"letter-spacing:\s*-?[\d.]+(px|em)", "letter-spacing:0", s)
 
@@ -192,7 +252,8 @@ PS = [
 ]
 
 for src_name, out_name, pairs in [("order-confirmation.liquid", "order-confirmation.ar.liquid", OC),
-                                   ("packing-slip.liquid", "packing-slip.ar.liquid", PS)]:
+                                   ("packing-slip.liquid", "packing-slip.ar.liquid", PS),
+                                   ("shipping-confirmation.liquid", "shipping-confirmation.ar.liquid", SHIP)]:
     s = (ROOT / src_name).read_text()
     s = apply(s, pairs, src_name)
     s = ar_letterspacing(s)
