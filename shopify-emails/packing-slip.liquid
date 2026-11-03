@@ -1,0 +1,532 @@
+{%- comment -%}
+  89 SHIRT SHOP — Packing slip
+  Paste into: Shopify admin > Settings > Shipping and delivery > Packing slips > Edit
+
+  Brand palette (from theme "89shirts"): ink #0a0a0a · red #e10b17 · bone #f3f2ef
+  Accent palette (theme badge colors): blue #2f6bff · pink #ff4f8b · purple #8b5cf6
+    orange #ff6a00 · green #1fb85a · yellow #ffd400
+
+  PRICES: Shopify's packing-slip variable list documents items, quantities and
+  addresses only. Every price / discount / total block below is guarded and shows
+  automatically when Shopify supplies the value, and hides cleanly when it doesn't.
+{%- endcomment -%}
+{%- liquid
+  assign brand_logo = 'https://cdn.shopify.com/s/files/1/0785/2956/0650/files/89shirt-email-logo-white.png?v=1793723695'
+  assign brand_qr = 'https://cdn.shopify.com/s/files/1/0785/2956/0650/files/89shirt-whatsapp-qr.png?v=1793724175'
+  assign brand_whatsapp_display = '+965 6689 9260'
+  assign brand_instagram = '@89shirt'
+  assign chip_colors = '#2f6bff,#ff4f8b,#8b5cf6,#ff6a00,#1fb85a' | split: ','
+
+  assign is_pickup = false
+  if delivery_method.type == 'pick-up'
+    assign is_pickup = true
+  endif
+
+  # Counters (always available)
+  assign line_count = 0
+  assign units_in_box = 0
+  assign units_in_order = 0
+  for line_item in line_items_in_shipment
+    assign line_count = line_count | plus: 1
+    assign units_in_box = units_in_box | plus: line_item.shipping_quantity
+    assign units_in_order = units_in_order | plus: line_item.quantity
+  endfor
+
+  # Price detection (only if Shopify exposes prices on this document)
+  assign show_prices = false
+  assign box_value = 0
+  assign box_saved = 0
+  for line_item in line_items_in_shipment
+    assign unit_price = line_item.final_price | default: line_item.price
+    if unit_price != nil
+      assign show_prices = true
+      assign line_box_value = unit_price | times: line_item.shipping_quantity
+      assign box_value = box_value | plus: line_box_value
+      if line_item.original_price != nil and line_item.original_price > unit_price
+        assign line_box_saved = line_item.original_price | minus: unit_price | times: line_item.shipping_quantity
+        assign box_saved = box_saved | plus: line_box_saved
+      endif
+    endif
+  endfor
+
+  assign show_totals = false
+  if order.total_price != nil
+    assign show_totals = true
+  endif
+
+  assign collect_on_delivery = false
+  if order.financial_status == 'pending' or order.financial_status == 'authorized' or order.financial_status == 'partially_paid'
+    assign collect_on_delivery = true
+    assign amount_to_collect = order.total_outstanding | default: order.total_price
+  endif
+-%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;900&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+
+<div class="slip">
+
+  {%- comment -%} ================= HEADER ================= {%- endcomment -%}
+  <div class="hdr">
+    <div class="hdr__brand">
+      <img src="{{ brand_logo }}" alt="{{ shop.name }}" class="hdr__logo">
+      <div>
+        <p class="eyebrow eyebrow--red">Packing slip</p>
+        <p class="hdr__title">Your fit is here<span class="red">.</span></p>
+      </div>
+    </div>
+    <div class="hdr__meta">
+      <p class="hdr__order">{{ order.name }}</p>
+      <p class="hdr__line">{{ order.created_at | date: format: "date" }}</p>
+      {% if order.po_number != blank %}<p class="hdr__line">PO #{{ order.po_number }}</p>{% endif %}
+    </div>
+  </div>
+  <div class="stripe">
+    <span style="background:#e10b17"></span><span style="background:#ff6a00"></span><span style="background:#ffd400"></span><span style="background:#1fb85a"></span><span style="background:#2f6bff"></span><span style="background:#8b5cf6"></span><span style="background:#ff4f8b"></span>
+  </div>
+
+  {%- comment -%} ================= STAT TILES ================= {%- endcomment -%}
+  <div class="stats">
+    <div class="stat" style="--c:#2f6bff">
+      <p class="stat__label">Items in this box</p>
+      <p class="stat__value">{{ units_in_box }}</p>
+      <p class="stat__sub">{{ line_count }} product{% if line_count != 1 %}s{% endif %}</p>
+    </div>
+    <div class="stat" style="--c:{% if includes_all_line_items_in_order %}#1fb85a{% else %}#ff6a00{% endif %}">
+      <p class="stat__label">Shipment</p>
+      <p class="stat__value stat__value--sm">{% if includes_all_line_items_in_order %}Complete{% else %}Partial{% endif %}</p>
+      <p class="stat__sub">{{ units_in_box }} of {{ units_in_order }} units</p>
+    </div>
+    <div class="stat" style="--c:#8b5cf6">
+      <p class="stat__label">Delivery</p>
+      <p class="stat__value stat__value--sm">
+        {%- case delivery_method.type -%}
+          {%- when 'pick-up' -%}Pickup
+          {%- when 'local' -%}Local delivery
+          {%- when 'none' -%}No shipping
+          {%- else -%}Shipping
+        {%- endcase -%}
+      </p>
+      <p class="stat__sub">{% if delivery_method.instructions != blank %}Has instructions{% else %}Standard{% endif %}</p>
+    </div>
+    {% if show_totals %}
+      <div class="stat stat--solid" style="--c:#e10b17">
+        <p class="stat__label">Order total</p>
+        <p class="stat__value stat__value--sm">{{ order.total_price | money }}</p>
+        <p class="stat__sub">{% if order.total_discounts > 0 %}Saved {{ order.total_discounts | money }}{% else %}{{ order.financial_status | replace: '_', ' ' | capitalize }}{% endif %}</p>
+      </div>
+    {% elsif show_prices %}
+      <div class="stat stat--solid" style="--c:#e10b17">
+        <p class="stat__label">Box value</p>
+        <p class="stat__value stat__value--sm">{{ box_value | money }}</p>
+        <p class="stat__sub">{% if box_saved > 0 %}Saved {{ box_saved | money }}{% else %}This shipment{% endif %}</p>
+      </div>
+    {% else %}
+      <div class="stat stat--solid" style="--c:#e10b17">
+        <p class="stat__label">Packed on</p>
+        <p class="stat__value stat__value--sm">{{ 'now' | date: "%b %d" }}</p>
+        <p class="stat__sub">{{ 'now' | date: "%Y" }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if collect_on_delivery and show_totals %}
+    <div class="cod">
+      <div>
+        <p class="eyebrow">Collect on delivery</p>
+        <p class="cod__text">Payment is {{ order.financial_status | replace: '_', ' ' }} &mdash; please collect from the customer.</p>
+      </div>
+      <p class="cod__amount">{{ amount_to_collect | money }}</p>
+    </div>
+  {% endif %}
+
+  {%- comment -%} ================= ADDRESSES ================= {%- endcomment -%}
+  <div class="addr">
+    {% unless is_pickup %}
+      <div class="addr__card" style="--c:#e10b17">
+        <p class="eyebrow eyebrow--c">{% if delivery_method.instructions != blank %}Deliver to{% else %}Ship to{% endif %}</p>
+        <p class="addr__body">
+          {% if shipping_address != blank %}
+            <strong>{{ shipping_address.name }}</strong>
+            {% if shipping_address.company != blank %}<br>{{ shipping_address.company }}{% endif %}
+            <br>{{ shipping_address.address1 }}
+            {% if shipping_address.address2 != blank %}<br>{{ shipping_address.address2 }}{% endif %}
+            {% if shipping_address.city_province_zip != blank %}<br>{{ shipping_address.city_province_zip }}{% elsif shipping_address.city != blank %}<br>{{ shipping_address.city }}{% endif %}
+            <br>{{ shipping_address.country }}
+            {% if shipping_address.phone != blank %}<br><span class="phone">&#9742; {{ shipping_address.phone }}</span>{% endif %}
+          {% else %}
+            No shipping address
+          {% endif %}
+        </p>
+      </div>
+    {% endunless %}
+    <div class="addr__card" style="--c:#2f6bff">
+      <p class="eyebrow eyebrow--c">Bill to</p>
+      <p class="addr__body">
+        {% if billing_address != blank %}
+          <strong>{{ billing_address.name }}</strong>
+          {% if billing_address.company != blank %}<br>{{ billing_address.company }}{% endif %}
+          <br>{{ billing_address.address1 }}
+          {% if billing_address.address2 != blank %}<br>{{ billing_address.address2 }}{% endif %}
+          {% if billing_address.city_province_zip != blank %}<br>{{ billing_address.city_province_zip }}{% elsif billing_address.city != blank %}<br>{{ billing_address.city }}{% endif %}
+          <br>{{ billing_address.country }}
+        {% else %}
+          No billing address
+        {% endif %}
+      </p>
+    </div>
+    {% if customer.name != blank or customer.email != blank %}
+      <div class="addr__card" style="--c:#8b5cf6">
+        <p class="eyebrow eyebrow--c">Customer</p>
+        <p class="addr__body">
+          {% if customer.name != blank %}<strong>{{ customer.name }}</strong>{% endif %}
+          {% if customer.email != blank %}<br>{{ customer.email }}{% endif %}
+          {% if is_pickup %}<br><span class="tag" style="--c:#8b5cf6">Store pickup</span>{% endif %}
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+  {%- comment -%} ================= ITEMS ================= {%- endcomment -%}
+  {% assign desired_image_size = 64 %}
+  {% assign resolution_adjusted_size = desired_image_size | times: 300 | divided_by: 72 | ceil %}
+  {% capture effective_image_dimensions %}{{ resolution_adjusted_size }}x{{ resolution_adjusted_size }}{% endcapture %}
+
+  <div class="section-head">
+    <p class="section-head__title">In the box</p>
+    <p class="section-head__count">{{ units_in_box }} item{% if units_in_box != 1 %}s{% endif %}</p>
+  </div>
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th class="items__check"></th>
+        <th colspan="2">Item</th>
+        {% if show_prices %}<th class="num">Price</th>{% endif %}
+        <th class="num">Qty</th>
+        {% if show_prices %}<th class="num">Total</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for line_item in line_items_in_shipment %}
+        {%- liquid
+          assign unit_price = line_item.final_price | default: line_item.price
+          assign qty_complete = false
+          if line_item.shipping_quantity == line_item.quantity
+            assign qty_complete = true
+          endif
+        -%}
+        <tr>
+          <td class="items__check"><span class="box"></span></td>
+          <td class="items__img">
+            {% if line_item.image != blank %}
+              {{ line_item.image | img_url: effective_image_dimensions | img_tag: '', 'items__photo' }}
+            {% else %}
+              <div class="items__photo items__photo--empty">89</div>
+            {% endif %}
+          </td>
+          <td class="items__desc">
+            <p class="items__title">{{ line_item.title }}</p>
+            <div class="chips">
+              {% if line_item.variant_title != blank %}
+                {% assign variant_parts = line_item.variant_title | split: ' / ' %}
+                {% for part in variant_parts %}
+                  {% assign ci = forloop.index0 | modulo: 5 %}
+                  <span class="chip" style="--c:{{ chip_colors[ci] }}">{{ part }}</span>
+                {% endfor %}
+              {% endif %}
+              {% if line_item.sku != blank %}<span class="chip chip--ghost">SKU {{ line_item.sku }}</span>{% endif %}
+              {% if line_item.vendor != blank and line_item.vendor != shop.name %}<span class="chip chip--ghost">{{ line_item.vendor }}</span>{% endif %}
+            </div>
+            {% for group in line_item.groups %}
+              <p class="items__meta">
+                {% if group.deliverable? %}
+                  <span class="tag" style="--c:#ff4f8b">Add-on</span> for {{ group.title }}
+                {% else %}
+                  <span class="tag" style="--c:#2f6bff">Bundle</span> part of {{ group.title }}
+                {% endif %}
+              </p>
+            {% endfor %}
+            {% for property in line_item.properties %}
+              {% assign property_first_char = property.first | slice: 0 %}
+              {% if property.last != blank and property_first_char != '_' %}
+                <p class="items__meta">
+                  <span class="tag" style="--c:#8b5cf6">{{ property.first }}</span>
+                  {% if property.last contains '/uploads/' %}
+                    <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
+                  {% else %}
+                    {{ property.last }}
+                  {% endif %}
+                </p>
+              {% endif %}
+            {% endfor %}
+            {% if show_prices %}
+              {% for discount_allocation in line_item.discount_allocations %}
+                {% if discount_allocation.amount > 0 %}
+                  <p class="items__meta"><span class="tag" style="--c:#e10b17">&#127991; {{ discount_allocation.discount_application.title | upcase }}</span> &minus;{{ discount_allocation.amount | money }}</p>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </td>
+          {% if show_prices %}
+            <td class="num">
+              {% if unit_price != nil %}
+                {% if line_item.original_price != nil and line_item.original_price > unit_price %}
+                  <span class="was">{{ line_item.original_price | money }}</span><br>
+                  <span class="now now--sale">{{ unit_price | money }}</span>
+                {% elsif unit_price == 0 %}
+                  <span class="tag" style="--c:#1fb85a">Free</span>
+                {% else %}
+                  <span class="now">{{ unit_price | money }}</span>
+                {% endif %}
+              {% endif %}
+            </td>
+          {% endif %}
+          <td class="num">
+            <span class="qty {% if qty_complete %}qty--full{% else %}qty--part{% endif %}">{{ line_item.shipping_quantity }}<small>/{{ line_item.quantity }}</small></span>
+          </td>
+          {% if show_prices %}
+            <td class="num">
+              {% if unit_price != nil %}
+                {% assign shipped_total = unit_price | times: line_item.shipping_quantity %}
+                {% if shipped_total == 0 %}<span class="green">Free</span>{% else %}<span class="now">{{ shipped_total | money }}</span>{% endif %}
+              {% endif %}
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% unless includes_all_line_items_in_order %}
+    {% unless is_pickup %}
+      <div class="notice" style="--c:#ff6a00">
+        <strong>Heads up:</strong> other items from your order are coming in a separate shipment.
+      </div>
+    {% endunless %}
+  {% endunless %}
+
+  {%- comment -%} ================= TOTALS (guarded) ================= {%- endcomment -%}
+  {% if show_totals or show_prices %}
+    <div class="totals-wrap">
+      <div class="totals-note">
+        {% if box_saved > 0 or order.total_discounts > 0 %}
+          <div class="saved">
+            <p class="saved__label">You saved</p>
+            <p class="saved__amount">{% if order.total_discounts > 0 %}{{ order.total_discounts | money }}{% else %}{{ box_saved | money }}{% endif %}</p>
+            {% for discount_application in order.discount_applications %}
+              <span class="tag tag--light">&#127991; {{ discount_application.title | upcase }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <table class="totals">
+        {% if show_prices and includes_all_line_items_in_order == false %}
+          <tr><td>This box</td><td class="num">{{ box_value | money }}</td></tr>
+        {% endif %}
+        {% if show_totals %}
+          {% if order.subtotal_price != nil %}
+            {% assign subtotal_before = order.subtotal_price | plus: order.total_discounts %}
+            <tr><td>Subtotal</td><td class="num">{{ subtotal_before | money }}</td></tr>
+          {% endif %}
+          {% if order.total_discounts > 0 %}
+            <tr class="totals__disc"><td>Discounts</td><td class="num">&minus;{{ order.total_discounts | money }}</td></tr>
+          {% endif %}
+          {% if order.shipping_price != nil %}
+            <tr><td>{% if is_pickup %}Pickup{% else %}Shipping{% endif %}{% if order.shipping_method.title != blank %} <small>({{ order.shipping_method.title }})</small>{% endif %}</td><td class="num">{% if order.shipping_price == 0 %}<span class="green">Free</span>{% else %}{{ order.shipping_price | money }}{% endif %}</td></tr>
+          {% endif %}
+          {% if order.total_duties > 0 %}
+            <tr><td>Duties</td><td class="num">{{ order.total_duties | money }}</td></tr>
+          {% endif %}
+          {% if order.tax_price > 0 %}
+            <tr><td>Taxes</td><td class="num">{{ order.tax_price | money }}</td></tr>
+          {% endif %}
+          <tr class="totals__grand"><td>Total</td><td class="num">{{ order.total_price | money_with_currency }}</td></tr>
+          {% if order.financial_status != blank %}
+            <tr><td colspan="2" class="num">
+              {% case order.financial_status %}
+                {% when 'paid' %}<span class="tag" style="--c:#1fb85a">&#10003; Paid</span>
+                {% when 'refunded', 'partially_refunded' %}<span class="tag" style="--c:#8b5cf6">{{ order.financial_status | replace: '_', ' ' | capitalize }}</span>
+                {% else %}<span class="tag" style="--c:#ff6a00">{{ order.financial_status | replace: '_', ' ' | capitalize }}</span>
+              {% endcase %}
+            </td></tr>
+          {% endif %}
+        {% elsif show_prices %}
+          <tr class="totals__grand"><td>Box total</td><td class="num">{{ box_value | money }}</td></tr>
+        {% endif %}
+      </table>
+    </div>
+  {% endif %}
+
+  {%- comment -%} ================= NOTES ================= {%- endcomment -%}
+  {% if order.note != blank or delivery_method.instructions != blank %}
+    <div class="notes">
+      {% if order.note != blank %}
+        <div class="sticky" style="--c:#ffd400">
+          <p class="eyebrow">Order note</p>
+          <p>{{ order.note }}</p>
+        </div>
+      {% endif %}
+      {% if delivery_method.instructions != blank %}
+        <div class="sticky" style="--c:#2f6bff">
+          <p class="eyebrow">Delivery instructions</p>
+          <p>{{ delivery_method.instructions }}</p>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {%- comment -%} ================= PACKING CHECK (staff) ================= {%- endcomment -%}
+  <div class="check">
+    <span><span class="box"></span> Picked</span>
+    <span><span class="box"></span> Quality checked</span>
+    <span><span class="box"></span> Packed</span>
+    <span class="check__sign">Packed by <i></i></span>
+  </div>
+
+  {%- comment -%} ================= THANK YOU / FOOTER ================= {%- endcomment -%}
+  <div class="thanks">
+    <div class="thanks__main">
+      <p class="eyebrow eyebrow--yellow">From the 89 crew</p>
+      <p class="thanks__title">Thank you{% if customer.first_name != blank %}, {{ customer.first_name }}{% endif %}!</p>
+      <p class="thanks__text">Wear it loud. Tag us <strong>{{ brand_instagram }}</strong> on Instagram &mdash; we repost our favourite fits.</p>
+      <p class="thanks__text thanks__text--dim">Wrong size or something off? Message us and we&rsquo;ll sort it out fast.</p>
+    </div>
+    <div class="thanks__qr">
+      <img src="{{ brand_qr }}" alt="WhatsApp QR">
+      <p>Scan to chat<br><strong>{{ brand_whatsapp_display }}</strong></p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <p class="foot__word"><span class="red">89</span> Shirt Shop</p>
+    <p class="foot__info">
+      {% if shop_address.summary != blank %}{{ shop_address.summary }}<br>{% endif %}
+      {{ shop.email }} &nbsp;&middot;&nbsp; {{ shop.domain }}
+    </p>
+  </div>
+</div>
+
+<style type="text/css">
+  @page { size: A4; margin: 10mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-size: 14px; background: #ffffff; }
+  p { margin: 0; }
+  .red { color: #e10b17; }
+  .green { color: #1fb85a; font-weight: 700; }
+
+  .slip {
+    width: 831px; max-width: 100%; margin: auto; padding: 0;
+    font-family: 'Kanit', 'Cairo', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 400; color: #0a0a0a; line-height: 1.45;
+  }
+  .eyebrow { font-size: 10.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: #5c5c5c; }
+  .eyebrow--red { color: #e10b17; }
+  .eyebrow--yellow { color: #ffd400; }
+  .eyebrow--c { color: var(--c); }
+
+  /* header */
+  .hdr { display: flex; justify-content: space-between; align-items: center; background: #0a0a0a; color: #fff; border-radius: 18px 18px 0 0; padding: 26px 30px; }
+  .hdr__brand { display: flex; align-items: center; gap: 18px; }
+  .hdr__logo { width: 64px; height: auto; display: block; }
+  .hdr__title { font-weight: 900; font-size: 30px; line-height: 1; letter-spacing: -.02em; text-transform: uppercase; margin-top: 4px; }
+  .hdr__meta { text-align: right; }
+  .hdr__order { display: inline-block; background: #e10b17; color: #fff; font-weight: 900; font-size: 22px; line-height: 1; padding: 10px 18px; border-radius: 999px; }
+  .hdr__line { font-size: 12px; color: #b5b5b5; margin-top: 6px; }
+  .stripe { display: flex; height: 7px; }
+  .stripe span { flex: 1; }
+
+  /* stats */
+  .stats { display: flex; gap: 10px; margin: 18px 0 14px; }
+  .stat { flex: 1; border-radius: 14px; padding: 14px 16px; background: color-mix(in srgb, var(--c) 10%, #fff); border: 2px solid var(--c); }
+  .stat--solid { background: var(--c); color: #fff; }
+  .stat__label { font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--c); }
+  .stat--solid .stat__label, .stat--solid .stat__sub { color: rgba(255,255,255,.85); }
+  .stat__value { font-weight: 900; font-size: 34px; line-height: 1.05; margin-top: 4px; }
+  .stat__value--sm { font-size: 20px; line-height: 1.25; }
+  .stat__sub { font-size: 11.5px; color: #5c5c5c; margin-top: 2px; }
+
+  /* cash on delivery */
+  .cod { display: flex; justify-content: space-between; align-items: center; background: #ffd400; border: 2px dashed #0a0a0a; border-radius: 14px; padding: 14px 20px; margin-bottom: 14px; }
+  .cod .eyebrow { color: #0a0a0a; }
+  .cod__text { font-size: 13px; margin-top: 2px; }
+  .cod__amount { font-weight: 900; font-size: 28px; }
+
+  /* addresses */
+  .addr { display: flex; gap: 10px; margin-bottom: 22px; }
+  .addr__card { flex: 1; background: #f3f2ef; border-radius: 14px; padding: 14px 16px; border-top: 5px solid var(--c); }
+  .addr__body { margin-top: 8px; font-size: 13px; line-height: 1.55; }
+  .phone { display: inline-block; margin-top: 4px; font-weight: 600; }
+
+  /* section head */
+  .section-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid #0a0a0a; padding-bottom: 6px; }
+  .section-head__title { font-weight: 900; font-size: 22px; text-transform: uppercase; letter-spacing: -.01em; }
+  .section-head__count { font-size: 12px; font-weight: 600; color: #5c5c5c; letter-spacing: .1em; text-transform: uppercase; }
+
+  /* items */
+  .items { width: 100%; border-collapse: collapse; }
+  .items th { font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: #8a8a8a; text-align: left; padding: 10px 6px; }
+  .items td { padding: 14px 6px; border-bottom: 1px solid #e6e5e2; vertical-align: top; }
+  .items tr { page-break-inside: avoid; }
+  .items tbody tr:nth-child(even) td { background: #faf9f7; }
+  .items .num { text-align: right; white-space: nowrap; }
+  .items__check { width: 26px; }
+  .items__img { width: 76px; }
+  .items__photo { width: 64px; height: 64px; object-fit: cover; border-radius: 12px; display: block; background: #f3f2ef; }
+  .items__photo--empty { display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 22px; color: #8a8a8a; }
+  .items__title { font-weight: 600; font-size: 15px; line-height: 1.3; }
+  .items__meta { font-size: 12px; color: #5c5c5c; margin-top: 6px; }
+  .chips { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { display: inline-block; font-size: 11px; font-weight: 600; line-height: 1; padding: 5px 10px; border-radius: 999px; background: var(--c); color: #fff; }
+  .chip--ghost { background: transparent; color: #5c5c5c; border: 1px solid #d0cfcc; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; line-height: 1; padding: 4px 9px; border-radius: 6px; color: var(--c); background: color-mix(in srgb, var(--c) 14%, #fff); }
+  .tag--light { color: #fff; background: rgba(255,255,255,.18); margin: 6px 4px 0 0; }
+  .was { font-size: 12px; color: #8a8a8a; text-decoration: line-through; }
+  .now { font-weight: 700; font-size: 14px; }
+  .now--sale { color: #e10b17; }
+  .qty { display: inline-block; min-width: 46px; text-align: center; font-weight: 900; font-size: 16px; padding: 5px 10px; border-radius: 999px; color: #fff; }
+  .qty small { font-weight: 500; font-size: 11px; opacity: .8; }
+  .qty--full { background: #0a0a0a; }
+  .qty--part { background: #ff6a00; }
+  .box { display: inline-block; width: 16px; height: 16px; border: 2px solid #0a0a0a; border-radius: 4px; vertical-align: -3px; }
+
+  .notice { margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 13px; background: color-mix(in srgb, var(--c) 12%, #fff); border-left: 5px solid var(--c); }
+
+  /* totals */
+  .totals-wrap { display: flex; gap: 18px; align-items: flex-start; margin-top: 18px; }
+  .totals-note { flex: 1; }
+  .saved { background: linear-gradient(135deg, #e10b17, #ff4f8b); color: #fff; border-radius: 14px; padding: 16px 18px; }
+  .saved__label { font-size: 10.5px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; opacity: .9; }
+  .saved__amount { font-weight: 900; font-size: 30px; line-height: 1.1; }
+  .totals { width: 330px; border-collapse: collapse; font-size: 13.5px; }
+  .totals td { padding: 6px 0; color: #5c5c5c; }
+  .totals .num { text-align: right; color: #0a0a0a; font-weight: 600; }
+  .totals small { color: #8a8a8a; }
+  .totals__disc td, .totals__disc .num { color: #e10b17; }
+  .totals__grand td { border-top: 3px solid #0a0a0a; padding-top: 12px; font-weight: 900; font-size: 15px; text-transform: uppercase; color: #0a0a0a; }
+  .totals__grand .num { font-size: 22px; text-transform: none; }
+
+  /* notes */
+  .notes { display: flex; gap: 10px; margin-top: 20px; }
+  .sticky { flex: 1; padding: 14px 16px; border-radius: 4px 14px 14px 14px; background: color-mix(in srgb, var(--c) 22%, #fff); border-left: 5px solid var(--c); font-size: 13px; }
+  .sticky .eyebrow { color: #0a0a0a; margin-bottom: 4px; }
+
+  /* staff check */
+  .check { display: flex; gap: 22px; align-items: center; margin-top: 20px; padding: 12px 16px; border: 2px dashed #d0cfcc; border-radius: 12px; font-size: 12.5px; font-weight: 600; color: #5c5c5c; }
+  .check__sign { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .check__sign i { display: inline-block; width: 140px; border-bottom: 1.5px solid #5c5c5c; height: 14px; }
+
+  /* thanks */
+  .thanks { display: flex; gap: 20px; align-items: center; margin-top: 22px; background: #0a0a0a; color: #fff; border-radius: 18px; padding: 22px 26px; position: relative; overflow: hidden; }
+  .thanks::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 8px; background: linear-gradient(#e10b17, #ff6a00, #ffd400, #1fb85a, #2f6bff, #8b5cf6, #ff4f8b); }
+  .thanks__main { flex: 1; }
+  .thanks__title { font-weight: 900; font-size: 30px; line-height: 1.05; text-transform: uppercase; letter-spacing: -.02em; margin-top: 4px; }
+  .thanks__text { font-size: 13px; color: #e6e5e2; margin-top: 8px; }
+  .thanks__text--dim { color: #8a8a8a; margin-top: 4px; }
+  .thanks__qr { text-align: center; background: #fff; color: #0a0a0a; border-radius: 14px; padding: 10px 10px 8px; }
+  .thanks__qr img { width: 96px; height: 96px; display: block; }
+  .thanks__qr p { font-size: 10.5px; line-height: 1.3; margin-top: 4px; }
+
+  .foot { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 16px; padding: 0 4px; }
+  .foot__word { font-weight: 900; font-size: 26px; text-transform: uppercase; letter-spacing: -.02em; }
+  .foot__info { text-align: right; font-size: 11px; color: #8a8a8a; line-height: 1.5; }
+</style>
