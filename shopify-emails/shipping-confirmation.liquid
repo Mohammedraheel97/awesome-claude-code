@@ -1,6 +1,6 @@
 {%- comment -%}
-  89 SHIRT SHOP — Shipping confirmation ("A shipment from order {{ name }} is on the way")
-  Paste into: Shopify admin > Settings > Notifications > Customer notifications > Shipping confirmation > Edit code
+  89 SHIRT SHOP — fulfillment notification (base template: Shipping confirmation)
+  Paste into: Shopify admin > Settings > Notifications > Customer notifications > [the matching notification] > Edit code
   Brand tokens match order-confirmation.liquid (ink #0a0a0a · red #e10b17 · bone #f3f2ef · Kanit / Cairo).
 {%- endcomment -%}
 {%- assign brand_logo = 'https://cdn.shopify.com/s/files/1/0785/2956/0650/files/89shirt-email-logo-white.png?v=1793723695' -%}
@@ -31,35 +31,110 @@
   {%- assign bo = '' -%}{%- assign bc = '' -%}{%- assign lo = '' -%}{%- assign lc = '' -%}
 {%- endif -%}
 
-{% if fulfillment.item_count == item_count %}
-  {% capture email_title %}Your order is on the way{% endcapture %}
-  {% capture hero_1 %}Your fit is{% endcapture %}{% capture hero_2 %}on the way.{% endcapture %}
-  {% capture email_body %}Your order is on the way. Track your shipment to see the delivery status.{% endcapture %}
+{%- comment -%}
+  STAGE — this one base powers 5 notifications. tools/make_variants.py rewrites these two lines:
+    shipping-confirmation      stage 'shipped'           is_local false
+    shipping-out-for-delivery  stage 'out_for_delivery'  is_local false
+    shipping-delivered         stage 'delivered'         is_local false
+    local-out-for-delivery     stage 'out_for_delivery'  is_local true
+    local-delivered            stage 'delivered'         is_local true
+{%- endcomment -%}
+{%- assign stage = 'shipped' -%}
+{%- assign is_local = false -%}
+
+{%- comment -%} ---- wording per stage ---- {%- endcomment -%}
+{%- case stage -%}
+  {%- when 'out_for_delivery' -%}
+    {%- capture s_is -%}is out for delivery{%- endcapture -%}
+    {%- capture s_are -%}are out for delivery{%- endcapture -%}
+    {%- capture hero_full -%}is out for delivery.{%- endcapture -%}
+    {%- capture tail_s -%}is out for delivery.{%- endcapture -%}
+    {%- capture tail_p -%}are out for delivery.{%- endcapture -%}
+    {%- capture body_tail -%}Track your shipment to see the delivery status.{%- endcapture -%}
+    {%- capture eyebrow -%}Out for delivery{%- endcapture -%}
+  {%- when 'delivered' -%}
+    {%- capture s_is -%}has been delivered{%- endcapture -%}
+    {%- capture s_are -%}have been delivered{%- endcapture -%}
+    {%- capture hero_full -%}has landed.{%- endcapture -%}
+    {%- capture tail_s -%}has landed.{%- endcapture -%}
+    {%- capture tail_p -%}have landed.{%- endcapture -%}
+    {%- capture body_tail -%}Enjoy your new fit — and tag @89shirt when you wear it.{%- endcapture -%}
+    {%- capture eyebrow -%}Delivered{%- endcapture -%}
+  {%- else -%}
+    {%- capture s_is -%}is on the way{%- endcapture -%}
+    {%- capture s_are -%}are on the way{%- endcapture -%}
+    {%- capture hero_full -%}is on the way.{%- endcapture -%}
+    {%- capture tail_s -%}is on the way.{%- endcapture -%}
+    {%- capture tail_p -%}are on the way.{%- endcapture -%}
+    {%- capture body_tail -%}Track your shipment to see the delivery status.{%- endcapture -%}
+    {%- capture eyebrow -%}Shipped{%- endcapture -%}
+{%- endcase -%}
+
+{% if is_local %}
+  {% capture email_title %}Your order {{ s_is }}{% endcapture %}
+  {% capture hero_1 %}Your fit{% endcapture %}{% capture hero_2 %}{{ hero_full }}{% endcapture %}
+  {% if stage == 'delivered' %}
+    {% capture email_body %}Your order {{ s_is }}. {{ body_tail }}{% endcapture %}
+  {% else %}
+    {% capture email_body %}Your order is on its way and will arrive soon.{% endcapture %}
+  {% endif %}
+{% elsif fulfillment.item_count == item_count %}
+  {% capture email_title %}Your order {{ s_is }}{% endcapture %}
+  {% capture hero_1 %}Your fit{% endcapture %}{% capture hero_2 %}{{ hero_full }}{% endcapture %}
+  {% capture email_body %}Your order {{ s_is }}. {{ body_tail }}{% endcapture %}
 {% elsif fulfillment.item_count > 1 %}
   {% if fulfillment_status == 'fulfilled' %}
-    {% capture email_title %}The last items in your order are on the way{% endcapture %}
-    {% capture hero_1 %}The last items{% endcapture %}{% capture hero_2 %}are on the way.{% endcapture %}
-    {% capture email_body %}The last items in your order are on the way. Track your shipment to see the delivery status.{% endcapture %}
+    {% capture email_title %}The last items in your order {{ s_are }}{% endcapture %}
+    {% capture hero_1 %}The last items{% endcapture %}{% capture hero_2 %}{{ tail_p }}{% endcapture %}
+    {% capture email_body %}The last items in your order {{ s_are }}. {{ body_tail }}{% endcapture %}
   {% else %}
-    {% capture email_title %}Some items in your order are on the way{% endcapture %}
-    {% capture hero_1 %}Some items{% endcapture %}{% capture hero_2 %}are on the way.{% endcapture %}
-    {% capture email_body %}Some items in your order are on the way. Track your shipment to see the delivery status.{% endcapture %}
+    {% capture email_title %}Some items in your order {{ s_are }}{% endcapture %}
+    {% capture hero_1 %}Some items{% endcapture %}{% capture hero_2 %}{{ tail_p }}{% endcapture %}
+    {% capture email_body %}Some items in your order {{ s_are }}. {{ body_tail }}{% endcapture %}
   {% endif %}
 {% else %}
   {% if fulfillment_status == 'fulfilled' %}
-    {% capture email_title %}The last item in your order is on the way{% endcapture %}
-    {% capture hero_1 %}The last item{% endcapture %}{% capture hero_2 %}is on the way.{% endcapture %}
-    {% capture email_body %}The last item in your order is on the way. Track your shipment to see the delivery status.{% endcapture %}
+    {% capture email_title %}The last item in your order {{ s_is }}{% endcapture %}
+    {% capture hero_1 %}The last item{% endcapture %}{% capture hero_2 %}{{ tail_s }}{% endcapture %}
+    {% capture email_body %}The last item in your order {{ s_is }}. {{ body_tail }}{% endcapture %}
   {% else %}
-    {% capture email_title %}One item in your order is on the way{% endcapture %}
-    {% capture hero_1 %}One item{% endcapture %}{% capture hero_2 %}is on the way.{% endcapture %}
-    {% capture email_body %}One item in your order is on the way. Track your shipment to see the delivery status.{% endcapture %}
+    {% capture email_title %}One item in your order {{ s_is }}{% endcapture %}
+    {% capture hero_1 %}One item{% endcapture %}{% capture hero_2 %}{{ tail_s }}{% endcapture %}
+    {% capture email_body %}One item in your order {{ s_is }}. {{ body_tail }}{% endcapture %}
   {% endif %}
 {% endif %}
 
 {%- liquid
+  # tracker: which step is current, and the step names
+  case stage
+    when 'out_for_delivery'
+      assign active_step = 3
+      assign bar_pct = 74
+    when 'delivered'
+      assign active_step = 4
+      assign bar_pct = 100
+    else
+      assign active_step = 2
+      assign bar_pct = 44
+  endcase
+  if is_local
+    assign step_labels = 'Ordered|Packed|Out for delivery|Delivered' | split: '|'
+  else
+    assign step_labels = 'Ordered|Shipped|Out for delivery|Delivered' | split: '|'
+  endif
+  assign show_eta = false
+  if fulfillment.estimated_delivery_at and stage != 'delivered'
+    assign show_eta = true
+  endif
+  assign stage_color = c_red
+  if stage == 'delivered'
+    assign stage_color = c_green
+  endif
+
   assign primary_track_url = nil
-  if fulfillment.tracking_url != blank
+  if stage == 'delivered'
+    # no "track" button once it has arrived
+  elsif fulfillment.tracking_url != blank
     assign primary_track_url = fulfillment.tracking_url
   elsif fulfillment.tracking_urls.size > 0
     assign primary_track_url = fulfillment.tracking_urls.first
@@ -105,7 +180,7 @@
 
 <body style="margin:0;padding:0;background:{{ c_bone }};">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:{{ c_bone }};opacity:0;">
-    {{ email_title }} &mdash; order {{ order_name }}{% if fulfillment.estimated_delivery_at %}, arriving {{ fulfillment.estimated_delivery_at | date: format: 'date' }}{% endif %}.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+    {{ email_title }} &mdash; order {{ order_name }}{% if show_eta %}, arriving {{ fulfillment.estimated_delivery_at | date: format: 'date' }}{% endif %}.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:{{ c_bone }};"{% if buyer_email_rtl %} dir="rtl"{% endif %}>
@@ -132,15 +207,25 @@
                 </tr>
                 <tr>
                   <td colspan="2" class="x-pad" style="padding:44px 36px 0;text-align:{{ a_start }};">
-                    <div style="font-family:{{ f_body }};font-size:12px;line-height:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:{{ c_red }};">
-                      &#9679;&nbsp;Shipped
+                    <div style="font-family:{{ f_body }};font-size:12px;line-height:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:{{ stage_color }};">
+                      &#9679;&nbsp;{{ eyebrow }}
                     </div>
                     <h1 class="x-hero" style="margin:12px 0 0;font-family:{{ f_display }};font-size:52px;line-height:50px;font-weight:900;letter-spacing:-1.5px;color:#ffffff;text-transform:uppercase;">
-                      {{ hero_1 }}<br><span style="color:{{ c_red }};">{{ hero_2 }}</span>
+                      {{ hero_1 }}<br><span style="color:{{ stage_color }};">{{ hero_2 }}</span>
                     </h1>
                     <div style="margin:20px 0 0;font-family:{{ f_body }};font-size:16px;line-height:26px;color:#cfcfcf;max-width:460px;">
                       {% if customer.first_name != blank %}Hi {{ bo }}{{ customer.first_name }}{{ bc }}! {% endif %}{{ email_body }}
                     </div>
+                    {% if stage == 'delivered' %}
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px;border:1px solid #2a2a2a;border-radius:12px;background:{{ c_ink2 }};">
+                        <tr>
+                          <td style="padding:12px 16px;font-family:{{ f_body }};font-size:14px;line-height:20px;color:#cfcfcf;text-align:{{ a_start }};">
+                            <span style="color:#ffd400;font-weight:700;">?</span>&nbsp; Haven’t received your package yet?
+                            <a href="https://wa.me/{{ brand_whatsapp }}?text={{ 'Hi 89, I have not received order ' | append: order_name | url_encode }}" style="color:#ffffff;font-weight:600;text-decoration:underline;">Let us know</a>
+                          </td>
+                        </tr>
+                      </table>
+                    {% endif %}
                   </td>
                 </tr>
 
@@ -152,29 +237,37 @@
                         <td style="padding:18px 16px 16px;">
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                             <tr>
-                              <td width="25%" align="center" valign="top" style="width:25%;">
-                                <div style="width:30px;height:30px;line-height:30px;border-radius:999px;background:{{ c_green }};color:#ffffff;font-family:{{ f_body }};font-size:15px;font-weight:700;margin:0 auto;">&#10003;</div>
-                                <div class="x-step-label" style="padding-top:8px;font-family:{{ f_body }};font-size:12px;line-height:16px;font-weight:600;color:#ffffff;">Ordered</div>
-                              </td>
-                              <td width="25%" align="center" valign="top" style="width:25%;">
-                                <div style="width:30px;height:30px;line-height:30px;border-radius:999px;background:{{ c_green }};color:#ffffff;font-family:{{ f_body }};font-size:15px;font-weight:700;margin:0 auto;">&#10003;</div>
-                                <div class="x-step-label" style="padding-top:8px;font-family:{{ f_body }};font-size:12px;line-height:16px;font-weight:600;color:#ffffff;">Packed</div>
-                              </td>
-                              <td width="25%" align="center" valign="top" style="width:25%;">
-                                <div style="width:30px;height:30px;line-height:30px;border-radius:999px;background:{{ c_red }};color:#ffffff;font-family:{{ f_body }};font-size:15px;font-weight:700;margin:0 auto;box-shadow:0 0 0 5px rgba(225,11,23,.25);">&#10148;</div>
-                                <div class="x-step-label" style="padding-top:8px;font-family:{{ f_body }};font-size:12px;line-height:16px;font-weight:700;color:{{ c_red }};">Shipped</div>
-                              </td>
-                              <td width="25%" align="center" valign="top" style="width:25%;">
-                                <div style="width:30px;height:30px;line-height:30px;border-radius:999px;background:#2a2a2a;color:{{ c_gray }};font-family:{{ f_body }};font-size:13px;font-weight:700;margin:0 auto;">4</div>
-                                <div class="x-step-label" style="padding-top:8px;font-family:{{ f_body }};font-size:12px;line-height:16px;font-weight:600;color:{{ c_gray }};">Delivered</div>
-                              </td>
+                              {% for label in step_labels %}
+                                {%- liquid
+                                  assign idx = forloop.index
+                                  assign state = 'todo'
+                                  if idx < active_step or stage == 'delivered'
+                                    assign state = 'done'
+                                  endif
+                                  if idx == active_step and stage != 'delivered'
+                                    assign state = 'now'
+                                  endif
+                                -%}
+                                <td width="25%" align="center" valign="top" style="width:25%;">
+                                  {% if state == 'done' %}
+                                    <div style="width:30px;height:30px;line-height:30px;border-radius:999px;background:{{ c_green }};color:#ffffff;font-family:{{ f_body }};font-size:15px;font-weight:700;margin:0 auto;{% if idx == active_step %}box-shadow:0 0 0 5px rgba(31,184,90,.25);{% endif %}">&#10003;</div>
+                                    <div class="x-step-label" style="padding-top:8px;font-family:{{ f_body }};font-size:12px;line-height:16px;font-weight:{% if idx == active_step %}700{% else %}600{% endif %};color:{% if idx == active_step %}{{ c_green }}{% else %}#ffffff{% endif %};">{{ label }}</div>
+                                  {% elsif state == 'now' %}
+                                    <div style="width:30px;height:30px;line-height:30px;border-radius:999px;background:{{ c_red }};color:#ffffff;font-family:{{ f_body }};font-size:15px;font-weight:700;margin:0 auto;box-shadow:0 0 0 5px rgba(225,11,23,.25);">&#10148;</div>
+                                    <div class="x-step-label" style="padding-top:8px;font-family:{{ f_body }};font-size:12px;line-height:16px;font-weight:700;color:{{ c_red }};">{{ label }}</div>
+                                  {% else %}
+                                    <div style="width:30px;height:30px;line-height:30px;border-radius:999px;background:#2a2a2a;color:{{ c_gray }};font-family:{{ f_body }};font-size:13px;font-weight:700;margin:0 auto;">{{ idx }}</div>
+                                    <div class="x-step-label" style="padding-top:8px;font-family:{{ f_body }};font-size:12px;line-height:16px;font-weight:600;color:{{ c_gray }};">{{ label }}</div>
+                                  {% endif %}
+                                </td>
+                              {% endfor %}
                             </tr>
                             <tr>
                               <td colspan="4" style="padding:14px 0 0;">
                                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:999px;background:#2a2a2a;">
                                   <tr>
-                                    <td width="68%" height="6" style="width:68%;height:6px;line-height:6px;font-size:0;background:{{ c_red }};border-radius:999px;">&nbsp;</td>
-                                    <td width="32%" height="6" style="width:32%;height:6px;line-height:6px;font-size:0;">&nbsp;</td>
+                                    <td width="{{ bar_pct }}%" height="6" style="width:{{ bar_pct }}%;height:6px;line-height:6px;font-size:0;background:{{ stage_color }};border-radius:999px;">&nbsp;</td>
+                                    {% if bar_pct < 100 %}<td width="{{ 100 | minus: bar_pct }}%" height="6" style="width:{{ 100 | minus: bar_pct }}%;height:6px;line-height:6px;font-size:0;">&nbsp;</td>{% endif %}
                                   </tr>
                                 </table>
                               </td>
@@ -187,12 +280,12 @@
                 </tr>
 
                 {%- comment -%} ---- estimated delivery + tracking ---- {%- endcomment -%}
-                {% if fulfillment.estimated_delivery_at or fulfillment.tracking_numbers.size > 0 %}
+                {% if show_eta or fulfillment.tracking_numbers.size > 0 %}
                   <tr>
                     <td colspan="2" class="x-pad" style="padding:12px 36px 0;">
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                         <tr>
-                          {% if fulfillment.estimated_delivery_at %}
+                          {% if show_eta %}
                             <td class="x-stack" valign="top" style="background:{{ c_red }};border-radius:14px;padding:16px 18px;text-align:{{ a_start }};{% if fulfillment.tracking_numbers.size > 0 %}width:46%;{% endif %}">
                               <div style="font-family:{{ f_body }};font-size:11px;line-height:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.85);">Estimated delivery</div>
                               <div style="padding-top:6px;font-family:{{ f_display }};font-size:22px;line-height:26px;font-weight:900;color:#ffffff;">{{ bo }}{{ fulfillment.estimated_delivery_at | date: format: 'date' }}{{ bc }}</div>
@@ -273,7 +366,7 @@
                 <tr>
                   <td style="text-align:{{ a_start }};">
                     <div style="font-family:{{ f_body }};font-size:11px;line-height:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:{{ c_red }};">In the box</div>
-                    <h2 style="margin:6px 0 0;font-family:{{ f_display }};font-size:26px;line-height:28px;font-weight:900;letter-spacing:-.5px;text-transform:uppercase;color:{{ c_ink }};">Items in this shipment</h2>
+                    <h2 style="margin:6px 0 0;font-family:{{ f_display }};font-size:26px;line-height:28px;font-weight:900;letter-spacing:-.5px;text-transform:uppercase;color:{{ c_ink }};">{% if is_local %}Items in delivery{% else %}Items in this shipment{% endif %}</h2>
                   </td>
                   <td valign="bottom" style="text-align:{{ a_end }};white-space:nowrap;">
                     <span style="display:inline-block;background:{{ c_ink }};color:#ffffff;border-radius:999px;padding:5px 12px;font-family:{{ f_body }};font-size:12px;line-height:16px;font-weight:600;">{{ lo }}{{ shipped_units }}{{ lc }} {% if shipped_units == 1 %}item{% else %}items{% endif %}</span>
@@ -372,7 +465,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:{{ c_bone }};border-radius:14px;">
                   <tr>
                     <td class="x-stack" valign="top" style="padding:22px 24px;text-align:{{ a_start }};">
-                      <div style="margin:0 0 6px;font-family:{{ f_body }};font-size:11px;line-height:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:{{ c_red }};">Shipping to</div>
+                      <div style="margin:0 0 6px;font-family:{{ f_body }};font-size:11px;line-height:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:{{ c_red }};">{% if stage == 'delivered' %}Delivered to{% elsif is_local %}Delivering to{% else %}Shipping to{% endif %}</div>
                       <div class="x-address" style="font-family:{{ f_body }};font-size:14px;line-height:21px;color:{{ c_ink }};"{% if buyer_email_rtl %} dir="auto"{% endif %}>{{ shipping_address | format_address }}</div>
                     </td>
                     {% if shipping_method %}
@@ -387,6 +480,31 @@
             </tr>
           {% else %}
             <tr><td style="background:#ffffff;height:24px;line-height:24px;font-size:0;">&nbsp;</td></tr>
+          {% endif %}
+
+          {%- comment -%} ============ DELIVERED: TAG US ============ {%- endcomment -%}
+          {% if stage == 'delivered' %}
+            <tr>
+              <td class="x-pad" style="background:#ffffff;padding:0 36px 16px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:{{ c_red }};border-radius:14px;">
+                  <tr>
+                    <td class="x-stack" valign="middle" style="padding:22px 24px;text-align:{{ a_start }};">
+                      <div style="font-family:{{ f_display }};font-size:24px;line-height:26px;font-weight:900;text-transform:uppercase;color:#ffffff;">Wear it. Tag it.</div>
+                      <div style="padding-top:6px;font-family:{{ f_body }};font-size:14px;line-height:20px;color:rgba(255,255,255,.9);">Post your fit and tag <b>@89shirt</b> &mdash; we repost our favourites.</div>
+                    </td>
+                    <td class="x-stack x-stack-gap" valign="middle" align="{{ a_end }}" style="padding:22px 24px;text-align:{{ a_end }};white-space:nowrap;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;">
+                        <tr>
+                          <td align="center" bgcolor="#ffffff" style="background:#ffffff;border-radius:999px;">
+                            <a href="{{ brand_instagram }}" style="display:inline-block;padding:13px 24px;font-family:{{ f_body }};font-size:14px;line-height:18px;font-weight:700;color:{{ c_red }};text-decoration:none;border-radius:999px;">Open Instagram</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
           {% endif %}
 
           {%- comment -%} ============ HELP STRIP ============ {%- endcomment -%}
